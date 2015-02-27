@@ -1,34 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="vocaltweet.lapasa.net.vocaltweet" >
+          package="net.lapasa.vocaltweet"
+          xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.SET_DEBUG_APP"/>
 
     <application
+        tools:replace="android:icon"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme"
+        android:name="com.orm.SugarApp">
         <meta-data
             android:name="com.crashlytics.ApiKey"
-            android:value="6feb41380ee24cb9a0c87c409132ebfc2ec8d607" />
+            android:value="6feb41380ee24cb9a0c87c409132ebfc2ec8d607"/>
+
+        <meta-data
+            android:name="DATABASE"
+            android:value="vocal_tweet.db"/>
+
+        <meta-data
+            android:name="VERSION"
+            android:value="4"/>
+
+        <meta-data
+            android:name="DOMAIN_PACKAGE_NAME"
+            android:value="net.lapasa.vocaltweet.models.entities"/>
+
+        <meta-data
+            android:name="QUERY_LOG"
+            android:value="true"/>
 
         <activity
-            android:name=".fragments.TextToSpeechCheckActivity"
-            android:label="@string/title_activity_text_to_speech_check" >
+            android:name="net.lapasa.vocaltweet.fragments.TextToSpeechCheckActivity"
+            android:label="@string/title_activity_text_to_speech_check"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
-            android:label="@string/app_name" >
+            android:name="net.lapasa.vocaltweet.MainActivity"
+            android:label="@string/app_name">
         </activity>
         <activity
-            android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings" >
+            android:name="net.lapasa.vocaltweet.SettingsActivity"
+            android:label="@string/title_activity_settings">
         </activity>
     </application>
 

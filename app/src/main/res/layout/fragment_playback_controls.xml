@@ -2,7 +2,7 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:context="vocaltweet.lapasa.net.vocaltweet.fragments.PlaybackControlsFragment"
+                tools:context="net.lapasa.vocaltweet.fragments.PlaybackControlsFragment"
                 android:background="@color/tw__medium_gray">
 
     <ProgressBar
@@ -12,38 +12,40 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         style="@android:style/Widget.ProgressBar.Horizontal"
-        android:progressBackgroundTint="@color/tw__blue_default"
-        android:secondaryProgressTint="@color/dgts__purple_pressed"/>
+        android:progressDrawable="@drawable/progressbar"/>
 
 
-    <ToggleButton
+    <CheckBox
         android:id="@+id/playPauseTweetBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textOn="Stop"
-        android:textOff="Play"
         android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
         android:layout_marginTop="15dp"
-        android:layout_marginBottom="15dp"/>
+        android:layout_marginBottom="15dp"
+        android:button="@drawable/playpause_selector"/>
 
-    <Button
+
+    <ImageButton
         android:id="@+id/prevTweetBtn"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Prev"
         android:layout_toLeftOf="@id/playPauseTweetBtn"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="15dp"/>
+        android:layout_centerVertical="true"
+        android:src="@drawable/ic_prev"
+        android:background="#00FFFFFF"/>
 
 
-    <Button
+    <ImageButton
         android:id="@+id/nextTweetBtn"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Next"
         android:layout_toRightOf="@id/playPauseTweetBtn"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="15dp"/>
+        android:layout_centerVertical="true"
+        android:src="@drawable/ic_next"
+        android:background="#00FFFFFF"/>
 
 
 </RelativeLayout>

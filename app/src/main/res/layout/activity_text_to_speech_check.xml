@@ -2,7 +2,7 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:context="vocaltweet.lapasa.net.vocaltweet.fragments.TextToSpeechCheckActivity">
+                tools:context="net.lapasa.vocaltweet.fragments.TextToSpeechCheckActivity">
 
     <TextView
         android:text="Checking if Text To Speech is installed..."

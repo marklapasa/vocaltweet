@@ -2,7 +2,7 @@
              xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
-             tools:context="vocaltweet.lapasa.net.vocaltweet.fragments.TweetDetailsFragment">
+             tools:context="net.lapasa.vocaltweet.fragments.TweetDetailsFragment">
 
 
     <com.twitter.sdk.android.tweetui.TweetView
@@ -16,6 +16,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/tweetDetailView"
         android:layout_alignParentBottom="true"
-        class="vocaltweet.lapasa.net.vocaltweet.fragments.PlaybackControlsFragment"/>
+        class="net.lapasa.vocaltweet.fragments.PlaybackControlsFragment"/>
 
 </RelativeLayout>
