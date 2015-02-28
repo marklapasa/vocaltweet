@@ -4,13 +4,15 @@ import android.database.sqlite.SQLiteException;
 
 import com.orm.SugarRecord;
 import com.orm.dsl.Ignore;
+import com.orm.dsl.Table;
 import com.twitter.sdk.android.core.models.Tweet;
 import com.twitter.sdk.android.core.models.User;
 import com.twitter.sdk.android.core.models.UserEntities;
 
 import java.util.List;
 
-public class UserRecord extends SugarRecord<UserRecord>
+@Table(name = "USER_RECORD")
+public class UserRecord extends SugarRecord
 {
     boolean contributorsEnabled;
     String createdAt;

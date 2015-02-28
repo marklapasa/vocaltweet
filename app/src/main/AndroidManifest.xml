@@ -23,7 +23,7 @@
 
         <meta-data
             android:name="VERSION"
-            android:value="4"/>
+            android:value="8"/>
 
         <meta-data
             android:name="DOMAIN_PACKAGE_NAME"

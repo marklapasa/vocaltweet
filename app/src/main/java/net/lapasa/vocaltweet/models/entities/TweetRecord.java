@@ -2,6 +2,7 @@ package net.lapasa.vocaltweet.models.entities;
 
 import com.orm.SugarRecord;
 import com.orm.dsl.Ignore;
+import com.orm.dsl.Table;
 import com.twitter.sdk.android.core.models.Coordinates;
 import com.twitter.sdk.android.core.models.MediaEntity;
 import com.twitter.sdk.android.core.models.Place;
@@ -13,7 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class TweetRecord extends SugarRecord<TweetRecord>
+
+@Table(name = "TWEET_RECORD")
+public class TweetRecord extends SugarRecord
 {
     private static final String TAG = TweetRecord.class.getName();
 
@@ -254,6 +257,10 @@ public class TweetRecord extends SugarRecord<TweetRecord>
 
     private User getUser()
     {
+        if (user == null && userRecord != null)
+        {
+            user = userRecord.getUser();
+        }
         return user;
     }
 
@@ -318,6 +325,7 @@ public class TweetRecord extends SugarRecord<TweetRecord>
         {
             list.add(record.getTweet());
         }
+
 
         return list;
     }

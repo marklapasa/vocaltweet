@@ -3,12 +3,14 @@ package net.lapasa.vocaltweet.models.entities;
 import android.database.sqlite.SQLiteException;
 
 import com.orm.SugarRecord;
+import com.orm.dsl.Table;
 import com.twitter.sdk.android.core.models.MediaEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MediaEntityRecord extends SugarRecord<MediaEntityRecord>
+@Table(name = "MEDIA_ENTITY_RECORD")
+public class MediaEntityRecord extends SugarRecord
 {
     TweetRecord owner;
     String url;

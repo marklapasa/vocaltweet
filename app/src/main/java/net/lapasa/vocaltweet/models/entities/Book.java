@@ -5,7 +5,7 @@ import com.orm.SugarRecord;
 /**
  * Created by mlapasa on 2/24/2015.
  */
-public class Book extends SugarRecord<Book>
+public class Book extends SugarRecord
 {
     String title;
 
