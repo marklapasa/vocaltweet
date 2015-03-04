@@ -1,32 +1,71 @@
 <resources>
     <string name="title_activity_settings">Settings</string>
 
-    <!-- Strings related to Settings -->
-
-    <!-- Example General settings -->
     <string name="pref_header_general">General</string>
 
-    <string name="pref_title_social_recommendations">Enable social recommendations</string>
-    <string name="pref_description_social_recommendations">Recommendations for people to contact
-        based on your message history
-    </string>
-
-    <string name="pref_title_display_name">Display name</string>
-    <string name="pref_default_display_name">John Smith</string>
-
-    <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
-    <string-array name="pref_example_list_titles">
-        <item>Always</item>
-        <item>When possible</item>
-        <item>Never</item>
+    <string name="pref_define_max_tweet">Max tweets to download</string>
+    <string-array name="pref_max_tweet_labels">
+        <item>25 Tweets</item>
+        <item>50 Tweets</item>
+        <item>75 Tweets</item>
+        <item>100 Tweets</item>
+        <item>150 Tweets</item>
+        <item>200 Tweets</item>
+        <item>250 Tweets</item>
+        <item>500 Tweets</item>
+        <item>1000 Tweets</item>
     </string-array>
-    <string-array name="pref_example_list_values">
-        <item>1</item>
-        <item>0</item>
+    <string-array name="pref_max_tweet_values">
+        <item>25</item>
+        <item>50</item>
+        <item>75</item>
+        <item>100</item>
+        <item>150</item>
+        <item>200</item>
+        <item>250</item>
+        <item>500</item>
+        <item>1000</item>
+    </string-array>
+    <string name="pref_tweet_cache_age">Auto delete tweets</string>
+    <string-array name="pref_tweet_cache_labels">
+        <item>Never delete</item>
+        <item>Older than 1 day</item>
+        <item>Older han 3 days</item>
+        <item>Older than 1 week</item>
+    </string-array>
+    <string-array name="pref_tweet_cache_values">
         <item>-1</item>
+        <item>1</item>
+        <item>3</item>
+        <item>7</item>
     </string-array>
 
-    <!-- Example settings for Data & Sync -->
+    <string name="pref_audio_gap">Silence between spoken tweets</string>
+    <string-array name="pref_audio_gap_labels">
+        <item>1 second</item>
+        <item>2 seconds</item>
+        <item>3 seconds</item>
+        <item>4 seconds</item>
+        <item>5 seconds</item>
+        <item>10 seconds</item>
+        <item>15 seconds</item>
+        <item>30 seconds</item>
+        <item>1 minute</item>
+    </string-array>
+
+    <string-array name="pref_audio_gap_values">
+        <item>1000</item>
+        <item>2000</item>
+        <item>3000</item>
+        <item>4000</item>
+        <item>5000</item>
+        <item>10000</item>
+        <item>15000</item>
+        <item>30000</item>
+        <item>60000</item>
+    </string-array>
+
+    <!-- Data & Sync -->
     <string name="pref_header_data_sync">Data &amp; sync</string>
 
     <string name="pref_title_sync_frequency">Sync frequency</string>
@@ -48,14 +87,4 @@
     </string-array>
 
     <string name="pref_title_system_sync_settings">System sync settings</string>
-
-    <!-- Example settings for Notifications -->
-    <string name="pref_header_notifications">Notifications</string>
-
-    <string name="pref_title_new_message_notifications">New message notifications</string>
-
-    <string name="pref_title_ringtone">Ringtone</string>
-    <string name="pref_ringtone_silent">Silent</string>
-
-    <string name="pref_title_vibrate">Vibrate</string>
 </resources>

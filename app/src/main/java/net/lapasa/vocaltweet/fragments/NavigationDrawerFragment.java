@@ -2,6 +2,7 @@ package net.lapasa.vocaltweet.fragments;
 
 
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -10,25 +11,34 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import net.lapasa.vocaltweet.R;
+import net.lapasa.vocaltweet.models.SearchTermsModel;
+import net.lapasa.vocaltweet.models.TweetsModel;
+import net.lapasa.vocaltweet.models.entities.SearchTermRecord;
+
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
  * See the <a href="https://developer.android.com/design/patterns/navigation-drawer.html#Interaction">
  * design guidelines</a> for a complete explanation of the behaviors implemented here.
  */
-public class NavigationDrawerFragment extends Fragment
+public class NavigationDrawerFragment extends Fragment implements Observer
 {
 
     /**
@@ -48,13 +58,18 @@ public class NavigationDrawerFragment extends Fragment
      */
     private ActionBarDrawerToggle mDrawerToggle;
 
-    private DrawerLayout mDrawerLayout;
-    private ListView mDrawerListView;
-    private View mFragmentContainerView;
+    private DrawerLayout navDrawer;
+    private ListView recentSearchesListView;
+    private View fragContainer;
 
     private int mCurrentSelectedPosition = 0;
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
+    private RecentSearchesAdapter adapter;
+    private EditText searchEditText;
+    private SearchTermsModel model = SearchTermsModel.getInstance();
+    private ImageButton clearCancelBtn;
+
 
     public NavigationDrawerFragment()
     {
@@ -89,12 +104,129 @@ public class NavigationDrawerFragment extends Fragment
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState)
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        mDrawerListView = (ListView) inflater.inflate(
-                R.layout.fragment_navigation_drawer, container, false);
-        mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        View view = inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
+
+
+        // User
+
+        // Search Field
+        initSearchField(view);
+
+        // Recent Searches
+        initRecentSearches(inflater, view);
+
+        return view;
+    }
+
+    private void initSearchField(View view)
+    {
+        clearCancelBtn = (ImageButton) view.findViewById(R.id.clearCancelBtn);
+
+        searchEditText = (EditText) view.findViewById(R.id.searchTermEditText);
+        searchEditText.setOnEditorActionListener(new TextView.OnEditorActionListener()
+        {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event)
+            {
+                if (event != null && v.getText().length() > 0)
+                {
+                    executeSearch();
+                }
+                return true;
+            }
+        });
+        searchEditText.addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after)
+            {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count)
+            {
+
+                if (s.length() == 0)
+                {
+                    clearCancelBtn.setVisibility(View.GONE);
+                }
+                else
+                {
+                    clearCancelBtn.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s)
+            {
+                // Do nothing
+            }
+        });
+/*
+        searchBtn = (Button) view.findViewById(R.id.searchBtn);
+        searchBtn.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                executeSearch();
+            }
+        });
+
+
+*/
+
+        clearCancelBtn.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                searchEditText.setText(null);
+            }
+        });
+    }
+
+    private void executeSearch()
+    {
+        // Close the Navigation drawer
+        navDrawer.closeDrawer(fragContainer);
+
+
+        // Persist the SearchTerm if it does not already exist
+        String term = String.valueOf(searchEditText.getText());
+        SearchTermRecord record = null;
+
+        record = SearchTermRecord.getRecord(term);
+
+        if (record == null)
+        {
+            record = new SearchTermRecord(term);
+            record.save();
+        }
+
+        // Update the title
+        getActionBar().setTitle(term);
+
+        // Launch a search for tweets
+
+        // Clear the edit text field
+        searchEditText.setText(null);
+
+        model.loadRecentSearchTerms();
+
+        TweetsModel.getInstance().loadTweets(record, getActivity());
+
+        navDrawer.closeDrawer(fragContainer);
+
+    }
+
+    private void initRecentSearches(LayoutInflater inflater, View view)
+    {
+        recentSearchesListView = (ListView) view.findViewById(R.id.recentSearchesListView);
+        recentSearchesListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
@@ -102,37 +234,36 @@ public class NavigationDrawerFragment extends Fragment
                 selectItem(position);
             }
         });
-        mDrawerListView.setAdapter(new ArrayAdapter<String>(
-                getActionBar().getThemedContext(),
-                android.R.layout.simple_list_item_1,
-                android.R.id.text1,
-                new String[]{
-                        getString(R.string.title_section1),
-                        getString(R.string.title_section2),
-                        getString(R.string.title_section3),
-                }));
-        mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
-        return mDrawerListView;
+
+        adapter = new RecentSearchesAdapter(getActivity().getLayoutInflater());
+
+        recentSearchesListView.setAdapter(adapter);
+        recentSearchesListView.setItemChecked(mCurrentSelectedPosition, true);
+
+//        recentSearchesListView.addHeaderView(inflater.inflate(R.layout.recent_searches_header, null));
+
+        recentSearchesListView.setEmptyView(view.findViewById(R.id.emptyView));
     }
+
 
     public boolean isDrawerOpen()
     {
-        return mDrawerLayout != null && mDrawerLayout.isDrawerOpen(mFragmentContainerView);
+        return navDrawer != null && navDrawer.isDrawerOpen(fragContainer);
     }
 
     /**
      * Users of this fragment must call this method to set up the navigation drawer interactions.
      *
-     * @param fragmentId   The android:id of this fragment in its activity's layout.
+     * @param fragmentId   The android:id of this fragment in its activity's recent_searches_empty.
      * @param drawerLayout The DrawerLayout containing this fragment's UI.
      */
     public void setUp(int fragmentId, DrawerLayout drawerLayout)
     {
-        mFragmentContainerView = getActivity().findViewById(fragmentId);
-        mDrawerLayout = drawerLayout;
+        fragContainer = getActivity().findViewById(fragmentId);
+        navDrawer = drawerLayout;
 
         // set a custom shadow that overlays the main content when the drawer opens
-        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+        navDrawer.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         // set up the drawer's list view with items and click listener
 
         ActionBar actionBar = getActionBar();
@@ -141,13 +272,11 @@ public class NavigationDrawerFragment extends Fragment
 
         // ActionBarDrawerToggle ties together the the proper interactions
         // between the navigation drawer and the action bar app icon.
-        mDrawerToggle = new ActionBarDrawerToggle(
-                getActivity(),                    /* host Activity */
-                mDrawerLayout,                    /* DrawerLayout object */
+        mDrawerToggle = new ActionBarDrawerToggle(getActivity(),                    /* host Activity */
+                navDrawer,                    /* DrawerLayout object */
                 R.drawable.ic_drawer,             /* nav drawer image to replace 'Up' caret */
                 R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
-                R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
-        )
+                R.string.navigation_drawer_close  /* "close drawer" description for accessibility */)
         {
             @Override
             public void onDrawerClosed(View drawerView)
@@ -175,8 +304,7 @@ public class NavigationDrawerFragment extends Fragment
                     // The user manually opened the drawer; store this flag to prevent auto-showing
                     // the navigation drawer automatically in the future.
                     mUserLearnedDrawer = true;
-                    SharedPreferences sp = PreferenceManager
-                            .getDefaultSharedPreferences(getActivity());
+                    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
                     sp.edit().putBoolean(PREF_USER_LEARNED_DRAWER, true).commit();
                 }
 
@@ -188,11 +316,11 @@ public class NavigationDrawerFragment extends Fragment
         // per the navigation drawer design guidelines.
         if (!mUserLearnedDrawer && !mFromSavedInstanceState)
         {
-            mDrawerLayout.openDrawer(mFragmentContainerView);
+            navDrawer.openDrawer(fragContainer);
         }
 
         // Defer code dependent on restoration of previous instance state.
-        mDrawerLayout.post(new Runnable()
+        navDrawer.post(new Runnable()
         {
             @Override
             public void run()
@@ -201,26 +329,32 @@ public class NavigationDrawerFragment extends Fragment
             }
         });
 
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        navDrawer.setDrawerListener(mDrawerToggle);
     }
 
     private void selectItem(int position)
     {
         mCurrentSelectedPosition = position;
-        if (mDrawerListView != null)
+        if (recentSearchesListView != null)
         {
-            mDrawerListView.setItemChecked(position, true);
+            recentSearchesListView.setItemChecked(position, true);
         }
-        if (mDrawerLayout != null)
+        if (navDrawer != null)
         {
-            mDrawerLayout.closeDrawer(mFragmentContainerView);
+            navDrawer.closeDrawer(fragContainer);
         }
-//        if (mCallbacks != null)
-//        {
-//            mCallbacks.onNavigationDrawerItemSelected(position);
-//        }
-    }
+        //        if (mCallbacks != null)
+        //        {
+        //            mCallbacks.onNavigationDrawerItemSelected(position);
+        //        }
 
+        if (adapter != null)
+        {
+            String title = (String) adapter.getItem(0);
+            getActionBar().setTitle(title);
+        }
+
+    }
 
 
     @Override
@@ -243,7 +377,7 @@ public class NavigationDrawerFragment extends Fragment
     {
         // If the drawer is open, show the global app actions in the action bar. See also
         // showGlobalContextActionBar, which controls the top-left area of the action bar.
-        if (mDrawerLayout != null && isDrawerOpen())
+        if (navDrawer != null && isDrawerOpen())
         {
             inflater.inflate(R.menu.global, menu);
             showGlobalContextActionBar();
@@ -251,22 +385,6 @@ public class NavigationDrawerFragment extends Fragment
         super.onCreateOptionsMenu(menu, inflater);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        if (mDrawerToggle.onOptionsItemSelected(item))
-        {
-            return true;
-        }
-
-        if (item.getItemId() == R.id.action_example)
-        {
-            Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     /**
      * Per the navigation drawer design guidelines, updates the action bar to show the global app
@@ -283,6 +401,28 @@ public class NavigationDrawerFragment extends Fragment
     private ActionBar getActionBar()
     {
         return getActivity().getActionBar();
+    }
+
+
+    @Override
+    public void update(Observable observable, Object data)
+    {
+        if (data == SearchTermsModel.SEARCH_TERMS_LOADED)
+        {
+            adapter.notifyDataSetInvalidated();
+        }
+    }
+
+    @Override
+    public void onAttach(Activity activity)
+    {
+        super.onAttach(activity);
+        model.addObserver(this);
+    }
+
+    public void closeDrawer()
+    {
+        navDrawer.closeDrawers();
     }
 
 }

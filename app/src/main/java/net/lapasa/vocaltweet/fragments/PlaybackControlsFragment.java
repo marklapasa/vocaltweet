@@ -12,6 +12,7 @@ import android.widget.ProgressBar;
 
 import net.lapasa.vocaltweet.R;
 import net.lapasa.vocaltweet.commands.PlayTweetCommand;
+import net.lapasa.vocaltweet.models.TweetsModel;
 
 import java.util.Observable;
 
@@ -79,24 +80,30 @@ public class PlaybackControlsFragment extends BaseFragment implements View.OnCli
     @Override
     public void update(Observable observable, Object data)
     {
-        nextBtn.setEnabled(model.hasNextTweet());
-        prevBtn.setEnabled(model.hasPrevTweet());
+        if (data == TweetsModel.NO_TWEETS_AVAILABLE)
+        {
+            getView().setVisibility(View.GONE);
+            getActivity().getActionBar().hide();
+        }
+        else
+        {
+            getView().setVisibility(View.VISIBLE);
+            getActivity().getActionBar().show();
+        }
 
+        getActivity().runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                nextBtn.setEnabled(model.hasNextTweet());
+                prevBtn.setEnabled(model.hasPrevTweet());
 
-        progressBar.setMax(model.getTweets().size());
-        progressBar.setProgress(model.getSelectedIndex());
-//
-//        if (data == TweetUtteranceProgressListener.UTTERANCE_COMPLETE)
-//        {
-//            if(model.hasNextTweet())
-//            {
-//                new PlayTweetCommand(getActivity(), model.getNextTweet(), listener).execute();
-//            }
-//            else
-//            {
-//                new PlayTweetCommand(getActivity(), null, listener).execute();
-//            }
-//        }
+                progressBar.setMax(model.getTweets().size());
+                progressBar.setProgress(model.getSelectedIndex() + 1);
+
+            }
+        });
     }
 
 
@@ -104,6 +111,8 @@ public class PlaybackControlsFragment extends BaseFragment implements View.OnCli
     public void onActivityCreated(Bundle savedInstanceState)
     {
         super.onActivityCreated(savedInstanceState);
+
+//        getView().setVisibility(View.GONE);
 
         this.nextBtn = (ImageButton) getView().findViewById(R.id.nextTweetBtn);
         this.prevBtn = (ImageButton) getView().findViewById(R.id.prevTweetBtn);

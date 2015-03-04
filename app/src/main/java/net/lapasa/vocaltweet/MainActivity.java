@@ -7,11 +7,11 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 
 import com.twitter.sdk.android.Twitter;
@@ -21,6 +21,7 @@ import com.twitter.sdk.android.core.TwitterSession;
 import net.lapasa.vocaltweet.fragments.LoginFragment;
 import net.lapasa.vocaltweet.fragments.NavigationDrawerFragment;
 import net.lapasa.vocaltweet.fragments.TweetsListFragment;
+import net.lapasa.vocaltweet.models.SearchTermsModel;
 import net.lapasa.vocaltweet.models.TweetsModel;
 
 import java.util.Locale;
@@ -32,8 +33,8 @@ public class MainActivity extends Activity implements ITweetModelActivity, TextT
 {
 
     // Note: Your consumer key and secret should be obfuscated in your source code before shipping.
-    private static final String TWITTER_KEY = "bPF4yqwkclyclnYmzwfuzCOsl";
-    private static final String TWITTER_SECRET = "T1BWzi4DZkXzwocCyXClCvsU9DHz693ziPOYYA3DgSwc2lD5GF";
+    private static final String TWITTER_KEY = "tsFoNCmPymFlWaz0SmldK3pOr";
+    private static final String TWITTER_SECRET = "gOw50hNRjIRvEmfS2qM5cdtU8Tetwklj0z6kit7t8UX5miyUyD";
 
 
     /**
@@ -47,6 +48,7 @@ public class MainActivity extends Activity implements ITweetModelActivity, TextT
     private CharSequence mTitle;
     private TweetsModel model;
     private TextToSpeech tts;
+    private SharedPreferences prefs;
 
     @SuppressLint("NewApi")
     @Override
@@ -61,6 +63,8 @@ public class MainActivity extends Activity implements ITweetModelActivity, TextT
         // Set up the drawer.
         navDrawerFrag = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
         navDrawerFrag.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
+
+
 
         mTitle = getTitle();
 
@@ -82,9 +86,8 @@ public class MainActivity extends Activity implements ITweetModelActivity, TextT
             loadFragment(new TweetsListFragment());
         }
 
+        prefs = getPreferences(MODE_PRIVATE);
 
-        // Customize toolbar
-//        getActionBar().set
     }
 
     /**
@@ -112,20 +115,6 @@ public class MainActivity extends Activity implements ITweetModelActivity, TextT
     }
 
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        if (!navDrawerFrag.isDrawerOpen())
-        {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
-            getMenuInflater().inflate(R.menu.main, menu);
-            restoreActionBar();
-            return true;
-        }
-        return super.onCreateOptionsMenu(menu);
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
@@ -141,7 +130,29 @@ public class MainActivity extends Activity implements ITweetModelActivity, TextT
             Intent settingsIntent = new Intent();
             settingsIntent.setClass(this, SettingsActivity.class);
             startActivity(settingsIntent);
+            navDrawerFrag.closeDrawer();
             return true;
+        }
+        else if(id == R.id.action_clear_recent_searches)
+        {
+            SearchTermsModel.getInstance().clearCache();
+            return true;
+        }
+        else if (id == R.id.action_clear_cached_tweets)
+        {
+            TweetsModel.getInstance().clearCache(this);
+            return true;
+        }
+        else if (id == R.id.action_about)
+        {
+
+        }
+        else if (id == R.id.action_sign_out)
+        {
+            TwitterSession session = Twitter.getSessionManager().getActiveSession();
+            Twitter.getSessionManager().clearActiveSession();
+            navDrawerFrag.closeDrawer();
+            loadFragment(new LoginFragment());
         }
 
         return super.onOptionsItemSelected(item);
@@ -159,7 +170,7 @@ public class MainActivity extends Activity implements ITweetModelActivity, TextT
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        super.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);  // requestCode=140, resultCode=0
 
         // The Login With Twitter button needs to receive this in order to clean itself up
         Fragment frag = getFragmentManager().findFragmentByTag(LoginFragment.class.getName());
@@ -167,6 +178,7 @@ public class MainActivity extends Activity implements ITweetModelActivity, TextT
         {
             frag.onActivityResult(requestCode, resultCode, data);
         }
+
         loadFragment(new TweetsListFragment());
     }
 
@@ -174,11 +186,7 @@ public class MainActivity extends Activity implements ITweetModelActivity, TextT
     @Override
     public TweetsModel getModel()
     {
-        if (model == null)
-        {
-            this.model = new TweetsModel();
-        }
-        return model;
+       return TweetsModel.getInstance();
     }
 
     @Override
@@ -198,6 +206,7 @@ public class MainActivity extends Activity implements ITweetModelActivity, TextT
     {
         Log.d(MainActivity.class.getName(), "Text To Speech Engine is ready for use");
         tts.setLanguage(Locale.US);
+        tts.setSpeechRate(0.6f);
     }
 
 

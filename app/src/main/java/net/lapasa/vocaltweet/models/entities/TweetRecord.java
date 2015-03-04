@@ -11,6 +11,7 @@ import com.twitter.sdk.android.core.models.TweetEntities;
 import com.twitter.sdk.android.core.models.User;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ import java.util.Map;
 public class TweetRecord extends SugarRecord
 {
     private static final String TAG = TweetRecord.class.getName();
+
 
     private String withheldScope;
 
@@ -45,7 +47,7 @@ public class TweetRecord extends SugarRecord
     private boolean favorited;
     String createdAt;
     String tweetIdStr;
-
+    long created;
     /////////////////
     // Coordinates //
     /////////////////
@@ -100,8 +102,7 @@ public class TweetRecord extends SugarRecord
     @Ignore
     private List<String> withheldInCountries;
 
-    // TODO: Create relationship between SearchTerm and Tweets (1 to many)
-    //    SearchTermRecord searchTerm;
+    SearchTermRecord searchTerm;
 
     public TweetRecord()
     {
@@ -115,10 +116,9 @@ public class TweetRecord extends SugarRecord
     {
 
         // Extrapolate the values out of each field on the tweet
-//        this.cord = tweet.coordinates;
         this.createdAt = tweet.createdAt;
+        this.created = new Date(createdAt).getTime();
         this.currentUserRetweet = tweet.currentUserRetweet;
-//        this.entities = tweet.entities;
 
         this.favorited = tweet.favorited;
 
@@ -132,7 +132,6 @@ public class TweetRecord extends SugarRecord
         this.inReplyToUserId = tweet.inReplyToUserId;
         this.inReplyToUserIdStr = tweet.inReplyToUserIdStr;
         this.lang = tweet.lang;
-//        this.place = tweet.place;
         this.possiblySensitive = tweet.possiblySensitive;
         this.scopes = tweet.scopes;
         this.retweetCount = tweet.retweetCount;
@@ -142,9 +141,7 @@ public class TweetRecord extends SugarRecord
         this.source = tweet.source;
         this.text = tweet.text;
         this.truncated = tweet.truncated;
-//        this.user = tweet.user;
         this.withheldCopyright = tweet.withheldCopyright;
-
         this.withheldInCountries = tweet.withheldInCountries;
         this.withheldScope = tweet.withheldScope;
 
@@ -172,7 +169,7 @@ public class TweetRecord extends SugarRecord
 
     private TweetEntities getEntities()
     {
-        return new TweetEntities(null,null,MediaEntityRecord.getMediaEntityList(this),null);
+        return new TweetEntities(null, null, MediaEntityRecord.getMediaEntityList(this), null);
     }
 
     private void setPlace(Place place)
@@ -252,7 +249,6 @@ public class TweetRecord extends SugarRecord
         }
 
 
-
     }
 
     private User getUser()
@@ -263,7 +259,6 @@ public class TweetRecord extends SugarRecord
         }
         return user;
     }
-
 
 
     ////////////
@@ -316,12 +311,32 @@ public class TweetRecord extends SugarRecord
         return null;
     }
 
+
+    /**
+     * Load home screen tweets
+     *
+     * @return
+     */
     public static List<Tweet> getAllTweets()
     {
-        List<TweetRecord> tmp = listAll(TweetRecord.class);
+        return getAllTweets(null);
+    }
+
+    public static List<Tweet> getAllTweets(SearchTermRecord searchTermRecord)
+    {
+        List<TweetRecord> results = null;
+
+        if (searchTermRecord != null)
+        {
+            results = TweetRecord.findWithQuery(TweetRecord.class, "Select * from TWEET_RECORD where searchTerm.term = ?", searchTermRecord.getTerm());
+        }
+        else
+        {
+            results = listAll(TweetRecord.class);
+        }
 
         List<Tweet> list = new ArrayList<Tweet>();
-        for (TweetRecord record : tmp)
+        for (TweetRecord record : results)
         {
             list.add(record.getTweet());
         }
@@ -341,16 +356,6 @@ public class TweetRecord extends SugarRecord
     // Delete //
     ////////////
 
-    /**
-     * Delete all the records that are in this list
-     *
-     * @param list the records marked to be deleted
-     * @return the number of records deleted
-     */
-    public static int deleteByList(List<Tweet> list)
-    {
-        return -1;
-    }
 
     public Tweet getTweet()
     {
@@ -365,5 +370,23 @@ public class TweetRecord extends SugarRecord
         UserRecord.deleteAll(UserRecord.class);
         MediaEntityRecord.deleteAll(MediaEntityRecord.class);
         TweetRecord.deleteAll(TweetRecord.class);
+    }
+
+    public static void deleteOldRecords(int days)
+    {
+        if (days > 0)
+        {
+            long now = new Date().getTime();
+
+            // 1 second, 60 seconds, 60 minutes, 24 hours, days
+            long daysInMilliseconds = 1000 * 60 * 60 * 24 * days;
+
+            long cutOffDate = now - daysInMilliseconds;
+
+            // Query for records whose inseration date - today is creater than the target age
+            String whereCause = "created < ?";
+            String whereArgs = String.valueOf(cutOffDate);
+            TweetRecord.deleteAll(TweetRecord.class, whereCause, whereArgs);
+        }
     }
 }

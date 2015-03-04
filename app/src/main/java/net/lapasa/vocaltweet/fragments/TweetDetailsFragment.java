@@ -36,7 +36,7 @@ public class TweetDetailsFragment extends BaseFragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
     {
-        // Inflate the layout for this fragment
+        // Inflate the recent_searches_empty for this fragment
         View v = inflater.inflate(R.layout.fragment_tweet_details, container, false);
         this.tweetDetailsView = (TweetView) v.findViewById(R.id.tweetDetailView);
         return v;

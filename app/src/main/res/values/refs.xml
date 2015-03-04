@@ -1,10 +1,10 @@
 <resources>
 
     <!--
-    Layout alias to replace the single-pane version of the layout with a
+    Layout alias to replace the single-pane version of the recent_searches_empty with a
     two-pane version on Large screens.
 
-    For more on layout aliases, see:
+    For more on recent_searches_empty aliases, see:
     http://developer.android.com/training/multiscreen/screensizes.html#TaskUseAliasFilters
     -->
     <item name="fragment_tweets" type="layout">@layout/fragment_tweets_list</item>

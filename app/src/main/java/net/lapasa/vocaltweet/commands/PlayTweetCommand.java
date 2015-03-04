@@ -2,23 +2,24 @@ package net.lapasa.vocaltweet.commands;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 
 import com.twitter.sdk.android.core.models.Tweet;
 
-import java.util.HashMap;
-
 import net.lapasa.vocaltweet.ITweetModelActivity;
 import net.lapasa.vocaltweet.fragments.TweetUtteranceProgressListener;
+
+import java.util.HashMap;
 
 /**
  * Converts a tweet's text to speech
  */
 public class PlayTweetCommand
 {
-    private static final String MSG_ID = "msgId";
+    public static final String MSG_ID = "msgId";
     private Tweet tweet = null;
     private TweetUtteranceProgressListener listener = null;
     private TextToSpeech tts = null;
@@ -47,9 +48,12 @@ public class PlayTweetCommand
         {
             composeAudibleText();
 
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
+
+
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP)
             {
                 tts.setOnUtteranceCompletedListener(listener);
+                listener.onStart(MSG_ID);
                 tts.speak(audibleText, TextToSpeech.QUEUE_ADD, getTTSParamsMap());
 
             } else
@@ -60,9 +64,9 @@ public class PlayTweetCommand
         }
         else
         {
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP)
             {
-                tts.speak("", TextToSpeech.QUEUE_FLUSH, getTTSParamsMap());
+                tts.playSilence(1,TextToSpeech.QUEUE_FLUSH, getTTSParamsMap());
 
             } else
             {
@@ -71,10 +75,14 @@ public class PlayTweetCommand
         }
     }
 
-    private HashMap<String, String> getTTSParamsMap()
+    public static HashMap<String, String> getTTSParamsMap()
     {
+        String audioStream = String.valueOf(AudioManager.STREAM_VOICE_CALL);
+
         HashMap<String, String> map = new HashMap<String, String>();
         map.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, MSG_ID);
+
+        map.put(TextToSpeech.Engine.KEY_PARAM_STREAM, audioStream);
         return map;
     }
 

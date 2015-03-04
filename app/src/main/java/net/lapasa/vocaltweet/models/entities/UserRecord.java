@@ -127,7 +127,7 @@ public class UserRecord extends SugarRecord
     {
         try
         {
-            List<UserRecord> userRecordList = UserRecord.find(UserRecord.class, "userId = " + userId, null);
+            List<UserRecord> userRecordList = UserRecord.find(UserRecord.class, "USER_ID = " + userId);
             if (userRecordList != null && !userRecordList.isEmpty())
             {
                 return userRecordList.get(0);

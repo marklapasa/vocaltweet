@@ -57,6 +57,4 @@ public abstract class BaseFragment extends Fragment implements Observer
         super.onDetach();
         act = null;
     }
-
-
 }

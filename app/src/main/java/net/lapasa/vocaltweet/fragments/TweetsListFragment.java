@@ -2,6 +2,8 @@ package net.lapasa.vocaltweet.fragments;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +16,9 @@ import com.twitter.sdk.android.tweetui.CompactTweetView;
 import com.twitter.sdk.android.tweetui.TweetViewFetchAdapter;
 
 import net.lapasa.vocaltweet.R;
+import net.lapasa.vocaltweet.models.TweetsModel;
 
 import java.util.Observable;
-
 
 
 /**
@@ -26,9 +28,10 @@ import java.util.Observable;
  * with a GridView.
  * <p/>
  */
-public class TweetsListFragment extends BaseFragment implements AbsListView.OnItemClickListener, AdapterView.OnItemSelectedListener
+public class TweetsListFragment extends BaseFragment implements AbsListView.OnItemClickListener, AdapterView.OnItemSelectedListener, View.OnClickListener
 {
 
+    private static final String TAG = TweetsListFragment.class.getName();
     /**
      * The fragment's ListView/GridView.
      */
@@ -39,6 +42,7 @@ public class TweetsListFragment extends BaseFragment implements AbsListView.OnIt
      * Views.
      */
     private TweetViewFetchAdapter adapter;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
 
     /**
@@ -60,26 +64,33 @@ public class TweetsListFragment extends BaseFragment implements AbsListView.OnIt
         // Define the container that will store the data
         // This container will always be reused
         adapter.setTweets(model.getTweets());
-        
+
         setEmptyText("Please Wait...");
-        model.loadTweets();
+        model.loadTweets(null, getActivity());
     }
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState)
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         View view = inflater.inflate(R.layout.fragment_tweets, container, false);
         listView = (AbsListView) view.findViewById(android.R.id.list);
         listView.setSmoothScrollbarEnabled(true);
 
-
-
-
         // Set OnItemClickListener so we can be notified on item clicks
         listView.setOnItemSelectedListener(this);
+        listView.setEmptyView(view.findViewById(R.id.emptyView));
 
+
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefreshLayout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
+        {
+            @Override
+            public void onRefresh()
+            {
+                model.loadTweets(model.getActiveSearchTerm(), getActivity());
+            }
+        });
         return view;
     }
 
@@ -116,17 +127,36 @@ public class TweetsListFragment extends BaseFragment implements AbsListView.OnIt
     @Override
     public void update(Observable observable, Object data)
     {
-        adapter.notifyDataSetInvalidated();
+        getActivity().runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                adapter.notifyDataSetInvalidated();
+            }
+        });
+
 
         if (data == TweetUtteranceProgressListener.UTTERANCE_COMPLETE)
         {
             // Disable hightlights
-            listView.setSelection(-1);
-        } else if (data == TweetUtteranceProgressListener.UTTERANCE_STARTED)
+//            listView.setSelection(-1);
+        }
+        else if (data == TweetUtteranceProgressListener.UTTERANCE_STARTED)
         {
             // Show tweet in list highlighted
-            listView.setSelection(model.getSelectedIndex());
+//            listView.setSelection(model.getSelectedIndex());
+            Log.i(TAG, "Scroll to tweet #" + model.getSelectedIndex());
             listView.smoothScrollToPosition(model.getSelectedIndex());
+        }
+        else if (data == TweetsModel.NO_TWEETS_AVAILABLE)
+        {
+            setEmptyText("No tweets are available\nPull to refresh");
+            swipeRefreshLayout.setRefreshing(false);
+        }
+        else if (data == TweetsModel.NEW_TWEETS_RECEIVED)
+        {
+            swipeRefreshLayout.setRefreshing(false);
         }
     }
 
@@ -147,5 +177,11 @@ public class TweetsListFragment extends BaseFragment implements AbsListView.OnIt
     public void onNothingSelected(AdapterView<?> parent)
     {
 
+    }
+
+    @Override
+    public void onClick(View v)
+    {
+        v.animate();
     }
 }
