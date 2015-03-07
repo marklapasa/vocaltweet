@@ -4,6 +4,9 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
@@ -17,7 +20,7 @@ import net.lapasa.vocaltweet.models.TweetsModel;
 /**
  * Created by mlapasa on 2/12/2015.
  */
-public class TweetUtteranceProgressListener extends UtteranceProgressListener implements TextToSpeech.OnUtteranceCompletedListener
+public class TweetUtteranceProgressListener extends UtteranceProgressListener // implements TextToSpeech.OnUtteranceCompletedListener
 {
     public static int UTTERANCE_STARTED = 10;
     public static int UTTERANCE_COMPLETE = 11;
@@ -37,17 +40,34 @@ public class TweetUtteranceProgressListener extends UtteranceProgressListener im
     public void onStart(String utteranceId)
     {
         // Maybe a good time to modify the TweetDetailsView's tweet view
-        model.notifyObservers(UTTERANCE_STARTED);
+        if (!utteranceId.equals(PlayTweetCommand.SILENCE))
+        {
+            model.notifyObservers(UTTERANCE_STARTED);
+        }
     }
+
 
     @Override
     public void onDone(String utteranceId)
     {
-        addSilienceGap();
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        silenceGap = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.pref_audio_gap), "0"));
+
+
+//        addSilienceGap(silenceGap);
 
         if (model.hasNextTweet() && model.isPlaying)
         {
-            new PlayTweetCommand(context, model.getNextTweet(), this).execute();
+            Handler h = new Handler(Looper.getMainLooper())
+            {
+                @Override
+                public void handleMessage(Message msg)
+                {
+                    super.handleMessage(msg);
+                    new PlayTweetCommand(context, model.getNextTweet(), TweetUtteranceProgressListener.this).execute();
+                }
+            };
+            h.sendEmptyMessageAtTime(0, silenceGap);
         }
         else if (!model.hasNextTweet())
         {
@@ -57,10 +77,8 @@ public class TweetUtteranceProgressListener extends UtteranceProgressListener im
     }
 
     @SuppressLint("NewApi")
-    private void addSilienceGap()
+    private void addSilienceGap(int silenceGap)
     {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        silenceGap = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.pref_audio_gap), "0"));
 
         // Enqueue silence
         if (silenceGap > 0)
@@ -68,11 +86,11 @@ public class TweetUtteranceProgressListener extends UtteranceProgressListener im
             TextToSpeech tts = ((ITweetModelActivity) context).getTextToSpeech();
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP)
             {
-                tts.playSilence(silenceGap, TextToSpeech.QUEUE_ADD, PlayTweetCommand.getTTSParamsMap());
+                tts.playSilence(this.silenceGap, TextToSpeech.QUEUE_ADD, PlayTweetCommand.getTTSParamsMap(PlayTweetCommand.SILENCE));
             }
             else
             {
-                tts.playSilentUtterance(silenceGap, TextToSpeech.QUEUE_ADD, PlayTweetCommand.MSG_ID);
+                tts.playSilentUtterance(this.silenceGap, TextToSpeech.QUEUE_ADD, PlayTweetCommand.SILENCE);
             }
         }
     }
@@ -84,12 +102,13 @@ public class TweetUtteranceProgressListener extends UtteranceProgressListener im
     }
 
     /**
-     * This is for suppose for devices that are on API 18 or less
+     * Support for devices that are on API 18 or less
      * @param utteranceId
-     */
+
     @Override
     public void onUtteranceCompleted(String utteranceId)
     {
         onDone(utteranceId);
     }
+     */
 }

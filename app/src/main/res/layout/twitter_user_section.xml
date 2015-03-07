@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <!-- User Profile Pic -->
+
+    <ImageView
+        android:id="@+id/userProfilePic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@mipmap/ic_launcher"
+        android:layout_centerVertical="true"/>
+
+    <View
+        android:id="@+id/centerPoint"
+        android:layout_width="1px"
+        android:layout_height="1px"
+        android:layout_centerInParent="true"/>
+
+    <!-- Name -->
+    <TextView
+        android:id="@+id/name"
+        android:layout_toRightOf="@id/userProfilePic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Name"
+        android:layout_above="@id/centerPoint"/>
+
+    <!-- Screen Name -->
+    <TextView
+        android:id="@+id/screenName"
+        android:layout_toRightOf="@id/userProfilePic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Screen Name"
+        android:layout_below="@id/centerPoint"/>
+
+    <!-- Age -->
+    <TextView
+        android:id="@+id/tweetAge"
+        android:layout_toRightOf="@id/userProfilePic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="10 minutes ago"
+        android:layout_below="@id/screenName"/>
+
+
+</RelativeLayout>

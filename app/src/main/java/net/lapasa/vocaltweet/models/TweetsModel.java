@@ -137,7 +137,7 @@ public class TweetsModel extends Observable
 
                 statusesService = apiClient.getStatusesService();
 
-                statusesService.homeTimeline(COUNT, null, null, null, null, null, null, new Callback<List<Tweet>>()
+                statusesService.homeTimeline(COUNT + 1, null, null, null, null, null, null, new Callback<List<Tweet>>()
                 {
                     @Override
                     public void success(Result<List<Tweet>> listResult)

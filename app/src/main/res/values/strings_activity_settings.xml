@@ -5,6 +5,7 @@
 
     <string name="pref_define_max_tweet">Max tweets to download</string>
     <string-array name="pref_max_tweet_labels">
+        <item>5 Tweets</item>
         <item>25 Tweets</item>
         <item>50 Tweets</item>
         <item>75 Tweets</item>
@@ -16,6 +17,7 @@
         <item>1000 Tweets</item>
     </string-array>
     <string-array name="pref_max_tweet_values">
+        <item>5</item>
         <item>25</item>
         <item>50</item>
         <item>75</item>

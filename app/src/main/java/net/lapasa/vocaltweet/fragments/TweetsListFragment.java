@@ -13,7 +13,7 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import com.twitter.sdk.android.tweetui.CompactTweetView;
-import com.twitter.sdk.android.tweetui.TweetViewFetchAdapter;
+import com.twitter.sdk.android.tweetui.TweetViewAdapter;
 
 import net.lapasa.vocaltweet.R;
 import net.lapasa.vocaltweet.models.TweetsModel;
@@ -41,7 +41,8 @@ public class TweetsListFragment extends BaseFragment implements AbsListView.OnIt
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
-    private TweetViewFetchAdapter adapter;
+    //    private TweetViewFetchAdapter adapter;
+    private TweetViewAdapter adapter;
     private SwipeRefreshLayout swipeRefreshLayout;
 
 
@@ -58,7 +59,8 @@ public class TweetsListFragment extends BaseFragment implements AbsListView.OnIt
     public void onActivityCreated(Bundle savedInstanceState)
     {
         super.onActivityCreated(savedInstanceState);
-        adapter = new TweetViewFetchAdapter<CompactTweetView>(getActivity());
+        //        adapter = new TweetViewFetchAdapter<CompactTweetView>(getActivity());
+        adapter = new CustomTweetViewAdapter<CompactTweetView>(getActivity());
         ((AdapterView<ListAdapter>) listView).setAdapter(adapter);
 
         // Define the container that will store the data
@@ -78,7 +80,21 @@ public class TweetsListFragment extends BaseFragment implements AbsListView.OnIt
         listView.setSmoothScrollbarEnabled(true);
 
         // Set OnItemClickListener so we can be notified on item clicks
-        listView.setOnItemSelectedListener(this);
+        listView.setOnItemClickListener(this);
+        listView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+        {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+            {
+                Log.d(TAG, "onItemSelected");
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent)
+            {
+                Log.d(TAG, "onNothingSelected");
+            }
+        });
         listView.setEmptyView(view.findViewById(R.id.emptyView));
 
 
@@ -127,6 +143,45 @@ public class TweetsListFragment extends BaseFragment implements AbsListView.OnIt
     @Override
     public void update(Observable observable, Object data)
     {
+        if (data == TweetUtteranceProgressListener.UTTERANCE_COMPLETE)
+        {
+            // Disable hightlights
+            //            listView.setSelection(-1);
+        }
+        else if (data == TweetUtteranceProgressListener.UTTERANCE_STARTED)
+        {
+            // Show tweet in list highlighted
+            //            listView.setSelection(model.getSelectedIndex());
+
+            Log.i(TAG, "Scroll to tweet #" + model.getSelectedIndex());
+
+            listView.post(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    listView.smoothScrollToPositionFromTop(model.getSelectedIndex(), 0);
+                    CompactTweetView vg = (CompactTweetView) listView.getChildAt(model.getSelectedIndex());
+                    vg.setBackgroundColor(0xff0000);
+                    //                    listView.setSelection(model.getSelectedIndex());
+                }
+            });
+        }
+        else if (data == TweetsModel.NO_TWEETS_AVAILABLE)
+        {
+            setEmptyText("No tweets are available\nPull to refresh");
+            swipeRefreshLayout.setRefreshing(false);
+            refreshAdapter();
+        }
+        else if (data == TweetsModel.NEW_TWEETS_RECEIVED)
+        {
+            swipeRefreshLayout.setRefreshing(false);
+            refreshAdapter();
+        }
+    }
+
+    private void refreshAdapter()
+    {
         getActivity().runOnUiThread(new Runnable()
         {
             @Override
@@ -135,29 +190,6 @@ public class TweetsListFragment extends BaseFragment implements AbsListView.OnIt
                 adapter.notifyDataSetInvalidated();
             }
         });
-
-
-        if (data == TweetUtteranceProgressListener.UTTERANCE_COMPLETE)
-        {
-            // Disable hightlights
-//            listView.setSelection(-1);
-        }
-        else if (data == TweetUtteranceProgressListener.UTTERANCE_STARTED)
-        {
-            // Show tweet in list highlighted
-//            listView.setSelection(model.getSelectedIndex());
-            Log.i(TAG, "Scroll to tweet #" + model.getSelectedIndex());
-            listView.smoothScrollToPosition(model.getSelectedIndex());
-        }
-        else if (data == TweetsModel.NO_TWEETS_AVAILABLE)
-        {
-            setEmptyText("No tweets are available\nPull to refresh");
-            swipeRefreshLayout.setRefreshing(false);
-        }
-        else if (data == TweetsModel.NEW_TWEETS_RECEIVED)
-        {
-            swipeRefreshLayout.setRefreshing(false);
-        }
     }
 
     @Override

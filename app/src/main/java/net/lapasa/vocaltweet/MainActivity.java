@@ -49,6 +49,7 @@ public class MainActivity extends Activity implements ITweetModelActivity, TextT
     private TweetsModel model;
     private TextToSpeech tts;
     private SharedPreferences prefs;
+    private NavigationDrawerFragment navDrawer;
 
     @SuppressLint("NewApi")
     @Override
@@ -218,5 +219,10 @@ public class MainActivity extends Activity implements ITweetModelActivity, TextT
     {
         tts.shutdown();
         super.onDestroy();
+    }
+
+    public NavigationDrawerFragment getNavDrawer()
+    {
+        return navDrawer;
     }
 }

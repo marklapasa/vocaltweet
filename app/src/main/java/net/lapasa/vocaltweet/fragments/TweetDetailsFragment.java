@@ -8,9 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.twitter.sdk.android.core.models.Tweet;
-import com.twitter.sdk.android.tweetui.TweetView;
-
-import net.lapasa.vocaltweet.R;
+import com.twitter.sdk.android.tweetui.CompactTweetView;
 
 import java.util.Observable;
 
@@ -24,7 +22,7 @@ public class TweetDetailsFragment extends BaseFragment
 
 
     private Tweet tweet;
-    private TweetView tweetDetailsView;
+    private CompactTweetView tweetDetailsView;
 
     public TweetDetailsFragment()
     {
@@ -36,10 +34,8 @@ public class TweetDetailsFragment extends BaseFragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
     {
-        // Inflate the recent_searches_empty for this fragment
-        View v = inflater.inflate(R.layout.fragment_tweet_details, container, false);
-        this.tweetDetailsView = (TweetView) v.findViewById(R.id.tweetDetailView);
-        return v;
+        this.tweetDetailsView = new CompactTweetView(inflater.getContext(), model.getSelectedTweet());
+        return tweetDetailsView;
     }
 
 
@@ -47,14 +43,17 @@ public class TweetDetailsFragment extends BaseFragment
     public void update(Observable observable, Object data)
     {
         this.tweet = model.getSelectedTweet();
-        tweetDetailsView.setTweet(tweet);
 
-        getActivity().getActionBar().setTitle(tweet.user.name);
-
-/*        if (data == TweetUtteranceProgressListener.UTTERANCE_STARTED)
+        getActivity().runOnUiThread(new Runnable()
         {
+            @Override
+            public void run()
+            {
+                tweetDetailsView.setTweet(tweet);
+                getActivity().getActionBar().setTitle(tweet.user.name);
+            }
+        });
 
-        }*/
     }
 
 }

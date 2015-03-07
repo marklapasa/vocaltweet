@@ -1,6 +1,5 @@
 package net.lapasa.vocaltweet.fragments;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.view.LayoutInflater;
@@ -22,7 +21,6 @@ import java.util.Observable;
  */
 public class PlaybackControlsFragment extends BaseFragment implements View.OnClickListener
 {
-    private TweetUtteranceProgressListener listener;
     private TextToSpeech.OnUtteranceCompletedListener supportListener;
 
     private ImageButton nextBtn;
@@ -49,6 +47,7 @@ public class PlaybackControlsFragment extends BaseFragment implements View.OnCli
     {
         PlayTweetCommand c = null;
 
+        TweetUtteranceProgressListener listener = new TweetUtteranceProgressListener(getActivity(), model);
         if (v.equals(nextBtn))
         {
             c = new PlayTweetCommand(getActivity(), model.getNextTweet(), listener);
@@ -62,7 +61,7 @@ public class PlaybackControlsFragment extends BaseFragment implements View.OnCli
             if (!playPauseBtn.isChecked())
             {
                 model.isPlaying = false;
-                c = new PlayTweetCommand(getActivity(), null, listener);
+                c = new PlayTweetCommand(getActivity(), null, null);
             }
             else
             {
@@ -101,7 +100,6 @@ public class PlaybackControlsFragment extends BaseFragment implements View.OnCli
 
                 progressBar.setMax(model.getTweets().size());
                 progressBar.setProgress(model.getSelectedIndex() + 1);
-
             }
         });
     }
@@ -123,6 +121,8 @@ public class PlaybackControlsFragment extends BaseFragment implements View.OnCli
         prevBtn.setOnClickListener(this);
         playPauseBtn.setOnClickListener(this);
 
+
+/*
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN_MR2)
         {
             supportListener = new TweetUtteranceProgressListener(getActivity(), model);
@@ -131,5 +131,6 @@ public class PlaybackControlsFragment extends BaseFragment implements View.OnCli
         {
             listener = new TweetUtteranceProgressListener(getActivity(), model);
         }
+*/
     }
 }

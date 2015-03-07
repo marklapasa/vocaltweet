@@ -1,6 +1,8 @@
 package net.lapasa.vocaltweet.models.entities;
 
 import android.database.sqlite.SQLiteException;
+import android.os.Build;
+import android.util.LongSparseArray;
 
 import com.orm.SugarRecord;
 import com.orm.dsl.Ignore;
@@ -9,11 +11,24 @@ import com.twitter.sdk.android.core.models.Tweet;
 import com.twitter.sdk.android.core.models.User;
 import com.twitter.sdk.android.core.models.UserEntities;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Table(name = "USER_RECORD")
 public class UserRecord extends SugarRecord
 {
+    /**
+     * Used for faster look up than DB for <= API 15
+     */
+    private static Map<Long, UserRecord> runtimeCacheMap;// = new HashMap<Long, UserRecord>();
+
+    /**
+     * Used for faster look up than DB for > API 16
+     */
+    private static LongSparseArray<UserRecord> runtimeCacheSparseArray;
+
+
     boolean contributorsEnabled;
     String createdAt;
     boolean defaultProfile;
@@ -63,6 +78,7 @@ public class UserRecord extends SugarRecord
 
     @Ignore
     UserEntities entities;
+    private static UserRecord cachedUserRecord;
 
 
     public UserRecord()
@@ -116,7 +132,40 @@ public class UserRecord extends SugarRecord
         this.withheldScope = user.withheldScope;
 
 
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
+        {
+            runtimeCacheMap = new HashMap<Long, UserRecord>();
+        }
+        else
+        {
+            runtimeCacheSparseArray = new LongSparseArray<UserRecord>();
+        }
     }
+
+    public static UserRecord getCachedUserRecord(long userId)
+    {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
+        {
+            return runtimeCacheMap.get(new Long(userId));
+        }
+        else
+        {
+            return runtimeCacheSparseArray.get(userId);
+        }
+    }
+
+    public static void putCachedUserRecord(long userId, UserRecord userRecord)
+    {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
+        {
+            runtimeCacheMap.put(new Long(userId), userRecord);
+        }
+        else
+        {
+            runtimeCacheSparseArray.put(userId, userRecord);
+        }
+    }
+
 
     public User getUser()
     {
@@ -125,15 +174,24 @@ public class UserRecord extends SugarRecord
 
     public static UserRecord findExistingUserRecord(long userId)
     {
+        // Check runtime cache before hitting the DB
+        UserRecord userRecord = getCachedUserRecord(userId);
+        if (userRecord != null)
+        {
+            return userRecord;
+        }
+
+
+        // If that fails, go to the DB to retrive record and then cache it
         try
         {
             List<UserRecord> userRecordList = UserRecord.find(UserRecord.class, "USER_ID = " + userId);
             if (userRecordList != null && !userRecordList.isEmpty())
             {
+                putCachedUserRecord(userId, userRecord);
                 return userRecordList.get(0);
             }
-        }
-        catch (SQLiteException e)
+        } catch (SQLiteException e)
         {
             return null;
         }

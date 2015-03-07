@@ -15,6 +15,7 @@ import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
 
+import net.lapasa.vocaltweet.MainActivity;
 import net.lapasa.vocaltweet.R;
 
 
@@ -37,6 +38,12 @@ public class LoginFragment extends Fragment
 //        getActivity().getActionBar().hide();
         View v = inflater.inflate(R.layout.fragment_login, null);
         loginBtn = (TwitterLoginButton) v.findViewById(R.id.login_button);
+        getActivity().getActionBar().hide();
+
+        if (getActivity().getActionBar().isShowing())
+        {
+            ((MainActivity) getActivity()).getNavDrawer().closeDrawer();
+        }
 
         loginBtn.setCallback(new Callback<TwitterSession>()
         {
@@ -44,6 +51,7 @@ public class LoginFragment extends Fragment
             public void success(Result<TwitterSession> result)
             {
                 Toast.makeText(getActivity(), "Logged into Twitter successfully", Toast.LENGTH_LONG);
+                getActivity().getActionBar().show();
             }
 
             @Override

@@ -51,6 +51,7 @@ public class NavigationDrawerFragment extends Fragment implements Observer
      * expands it. This shared preference tracks this.
      */
     private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
+    private static final String CLOSE_NAV_DRAWER = "CLOSE_NAV_DRAWER" ;
 
 
     /**
@@ -411,6 +412,11 @@ public class NavigationDrawerFragment extends Fragment implements Observer
         {
             adapter.notifyDataSetInvalidated();
         }
+        else if (data == CLOSE_NAV_DRAWER)
+        {
+            navDrawer.closeDrawers();
+        }
+
     }
 
     @Override

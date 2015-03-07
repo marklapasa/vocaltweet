@@ -6,6 +6,7 @@ import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
+import android.util.Log;
 
 import com.twitter.sdk.android.core.models.Tweet;
 
@@ -19,7 +20,9 @@ import java.util.HashMap;
  */
 public class PlayTweetCommand
 {
-    public static final String MSG_ID = "msgId";
+    private static final String TAG = PlayTweetCommand.class.getName();
+    public static final String SILENCE = "_SILENCE";
+    private boolean isStopTTS;
     private Tweet tweet = null;
     private TweetUtteranceProgressListener listener = null;
     private TextToSpeech tts = null;
@@ -37,50 +40,71 @@ public class PlayTweetCommand
     {
         this.context = context;
         this.tts = ((ITweetModelActivity) context).getTextToSpeech();
-        this.tweet = tweet;
-        this.listener = listener;
+
+        if (tweet == null && listener == null)
+        {
+            isStopTTS = true;
+        }
+        else
+        {
+            this.tweet = tweet;
+            this.listener = listener;
+        }
     }
 
     @SuppressLint("NewApi")
     public void execute()
     {
-        if(tweet != null)
+        if (isStopTTS)
+        {
+            tts.stop();
+            Log.i(TAG, "Stopping audio, queue is flushed");
+        }
+        else if(tweet != null)
         {
             composeAudibleText();
 
 
+            tts.setOnUtteranceProgressListener(listener);
+/*
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
+            {
+                tts.setOnUtteranceProgressListener(listener);
+            }
+            else
+            {
+                tts.setOnUtteranceCompletedListener(listener);
+            }
+*/
 
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP)
             {
-                tts.setOnUtteranceCompletedListener(listener);
-                listener.onStart(MSG_ID);
-                tts.speak(audibleText, TextToSpeech.QUEUE_ADD, getTTSParamsMap());
-
+                tts.speak(audibleText, TextToSpeech.QUEUE_ADD, getTTSParamsMap(tweet.idStr));
+                Log.i(TAG, tweet.user.name);
             } else
             {
-                tts.setOnUtteranceProgressListener(listener);
-                tts.speak(audibleText, TextToSpeech.QUEUE_ADD, getTTSParamsBundle(), MSG_ID);
+                tts.speak(audibleText, TextToSpeech.QUEUE_ADD, getTTSParamsBundle(), tweet.idStr);
             }
         }
         else
         {
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP)
             {
-                tts.playSilence(1,TextToSpeech.QUEUE_FLUSH, getTTSParamsMap());
-
+                tts.playSilence(1,TextToSpeech.QUEUE_FLUSH, getTTSParamsMap(SILENCE));
+                Log.i(TAG, SILENCE);
             } else
             {
-                tts.playSilentUtterance(1,TextToSpeech.QUEUE_FLUSH, MSG_ID);
+                tts.playSilentUtterance(1,TextToSpeech.QUEUE_FLUSH, SILENCE);
             }
         }
     }
 
-    public static HashMap<String, String> getTTSParamsMap()
+    public static HashMap<String, String> getTTSParamsMap(String idStr)
     {
-        String audioStream = String.valueOf(AudioManager.STREAM_VOICE_CALL);
+        String audioStream = String.valueOf(AudioManager.STREAM_MUSIC);
 
         HashMap<String, String> map = new HashMap<String, String>();
-        map.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, MSG_ID);
+        map.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, idStr);
 
         map.put(TextToSpeech.Engine.KEY_PARAM_STREAM, audioStream);
         return map;
@@ -99,6 +123,7 @@ public class PlayTweetCommand
         audibleText = tweet.user.name + " says ... " + tweet.text;
         audibleText = audibleText.replaceAll("RT\\s?", "Rhee Tweeets");
         audibleText = audibleText.replaceAll("((http[s]?|ftp):\\/)?\\/?([^:\\/\\s]+)((\\/\\w+)*\\/)([\\w\\-\\.]+[^#?\\s]+)(.*)?(#[\\w\\-]+)?", "");
+        audibleText = audibleText.replace("<3", "love");
         audibleText += "...";
     }
 }
