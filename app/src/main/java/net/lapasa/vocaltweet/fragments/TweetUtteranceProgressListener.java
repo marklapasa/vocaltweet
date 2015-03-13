@@ -1,19 +1,11 @@
 package net.lapasa.vocaltweet.fragments;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
-import android.preference.PreferenceManager;
-import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.widget.Toast;
 
-import net.lapasa.vocaltweet.ITweetModelActivity;
-import net.lapasa.vocaltweet.R;
 import net.lapasa.vocaltweet.commands.PlayTweetCommand;
 import net.lapasa.vocaltweet.models.TweetsModel;
 
@@ -22,6 +14,7 @@ import net.lapasa.vocaltweet.models.TweetsModel;
  */
 public class TweetUtteranceProgressListener extends UtteranceProgressListener // implements TextToSpeech.OnUtteranceCompletedListener
 {
+    public static int SILENCE = -100;
     public static int UTTERANCE_STARTED = 10;
     public static int UTTERANCE_COMPLETE = 11;
 
@@ -29,18 +22,20 @@ public class TweetUtteranceProgressListener extends UtteranceProgressListener //
     private int silenceGap = 0;
 
     public TweetsModel model;
+    private Handler handler;
 
-    public TweetUtteranceProgressListener(Context context, TweetsModel model)
+    public TweetUtteranceProgressListener(Context context, TweetsModel model, int silenceGap)
     {
         this.context = context;
         this.model = model;
+        this.silenceGap = silenceGap;
     }
 
     @Override
     public void onStart(String utteranceId)
     {
         // Maybe a good time to modify the TweetDetailsView's tweet view
-        if (!utteranceId.equals(PlayTweetCommand.SILENCE))
+        if (!utteranceId.equals(PlayTweetCommand.SILENCE_ID))
         {
             model.notifyObservers(UTTERANCE_STARTED);
         }
@@ -50,55 +45,40 @@ public class TweetUtteranceProgressListener extends UtteranceProgressListener //
     @Override
     public void onDone(String utteranceId)
     {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        silenceGap = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.pref_audio_gap), "0"));
-
-
-//        addSilienceGap(silenceGap);
-
         if (model.hasNextTweet() && model.isPlaying)
         {
-            Handler h = new Handler(Looper.getMainLooper())
+            model.notifyObservers(SILENCE);
+            handler = new Handler(Looper.getMainLooper());
+            handler.postDelayed(new Runnable()
             {
                 @Override
-                public void handleMessage(Message msg)
+                public void run()
                 {
-                    super.handleMessage(msg);
                     new PlayTweetCommand(context, model.getNextTweet(), TweetUtteranceProgressListener.this).execute();
+
                 }
-            };
-            h.sendEmptyMessageAtTime(0, silenceGap);
+            },silenceGap);
+
+
         }
         else if (!model.hasNextTweet())
         {
             model.isPlaying = false;
+            handler.removeCallbacksAndMessages(null);
         }
         model.notifyObservers(UTTERANCE_COMPLETE);
     }
 
-    @SuppressLint("NewApi")
-    private void addSilienceGap(int silenceGap)
-    {
-
-        // Enqueue silence
-        if (silenceGap > 0)
-        {
-            TextToSpeech tts = ((ITweetModelActivity) context).getTextToSpeech();
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP)
-            {
-                tts.playSilence(this.silenceGap, TextToSpeech.QUEUE_ADD, PlayTweetCommand.getTTSParamsMap(PlayTweetCommand.SILENCE));
-            }
-            else
-            {
-                tts.playSilentUtterance(this.silenceGap, TextToSpeech.QUEUE_ADD, PlayTweetCommand.SILENCE);
-            }
-        }
-    }
 
     @Override
     public void onError(String utteranceId)
     {
         Toast.makeText(context, "Failed to speak Tweet", Toast.LENGTH_LONG).show();
+    }
+
+    public void refreshControls()
+    {
+        model.notifyObservers(UTTERANCE_COMPLETE);
     }
 
     /**

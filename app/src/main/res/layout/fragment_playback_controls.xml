@@ -1,28 +1,42 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:context=".MainActivity"
-                android:background="@color/tw__blue_pressed">
-
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="match_parent"
-        android:layout_height="3dp"
-        android:layout_alignParentTop="true"
-        style="@android:style/Widget.ProgressBar.Horizontal"
-        android:progressDrawable="@drawable/progressbar"/>
+                android:padding="20dp">
 
 
     <!-- Play/Pause button -->
-    <CheckBox
-        android:id="@+id/playPauseTweetBtn"
+    <include
+        layout="@layout/playpause"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:paddingTop="75dp"
-        android:paddingBottom="75dp"
-        android:button="@drawable/playpause_selector"/>
+        android:id="@+id/playPauseTweetBtn"
+        android:layout_centerInParent="true"/>
+
+    <net.lapasa.vocaltweet.fragments.playback.CustomHoloCircularProgressBar
+        android:id="@+id/holoCircularProgressBarSilence"
+        android:layout_width="125dp"
+        android:layout_height="125dp"
+        app:progress="0.0"
+        app:progress_color="#AAA"
+        app:progress_background_color="#666"
+        app:thumb_visible="false"
+        app:marker_visible="false"
+        android:layout_centerInParent="true"/>
+
+    <net.lapasa.vocaltweet.fragments.playback.CustomHoloCircularProgressBar
+        android:id="@+id/holoCircularProgressBar"
+        android:layout_width="125dp"
+        android:layout_height="125dp"
+        app:progress="0.0"
+        app:progress_color="#fff"
+        app:progress_background_color="#00000000"
+        app:thumb_visible="false"
+        app:marker_visible="false"
+        android:layout_centerInParent="true"/>
+
 
 
     <!-- Rewind -->
@@ -30,7 +44,7 @@
         android:id="@+id/prevTweetBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@id/playPauseTweetBtn"
+        android:layout_toLeftOf="@id/holoCircularProgressBar"
         android:layout_centerVertical="true"
         android:src="@drawable/ic_prev"
         android:background="#00FFFFFF"/>
@@ -41,7 +55,7 @@
         android:id="@+id/nextTweetBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/playPauseTweetBtn"
+        android:layout_toRightOf="@id/holoCircularProgressBar"
         android:layout_centerVertical="true"
         android:src="@drawable/ic_next"
         android:background="#00FFFFFF"/>

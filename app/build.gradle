@@ -26,8 +26,10 @@ dependencies {
         transitive = true;
     }
     compile 'com.android.support:support-v4:21.0.3'
+    compile 'com.pkmmte.view:circularimageview:1.1'
     //    compile 'com.github.satyan:sugar:1.3'
     compile project(':sugar')
+    compile project(":android-HoloCircularProgressBar")
 }
 
 buildscript {

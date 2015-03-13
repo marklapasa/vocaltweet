@@ -13,7 +13,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="@drawable/backpeat">
 
 
         <!-- Can be either -->
@@ -27,7 +28,7 @@
             android:id="@+id/playbackControls"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            class="net.lapasa.vocaltweet.fragments.PlaybackControlsFragment"
+            class="net.lapasa.vocaltweet.fragments.playback.PlaybackControlsFragment"
             android:layout_weight="1"
             tools:layout="@layout/fragment_playback_controls"/>
 

@@ -3,7 +3,7 @@
              xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
-             tools:context="net.lapasa.vocaltweet.fragments.TweetsListFragment">
+             tools:context="net.lapasa.vocaltweet.fragments.list.TweetsListFragment">
 
     <GridView
         android:id="@android:id/list"
@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@android:id/list"
         android:layout_alignParentBottom="true"
-        class="net.lapasa.vocaltweet.fragments.PlaybackControlsFragment"/>
+        class="net.lapasa.vocaltweet.fragments.playback.PlaybackControlsFragment"/>
 
 
 </RelativeLayout>

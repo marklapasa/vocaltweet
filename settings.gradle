@@ -1,3 +1,6 @@
 include ':app'
 include ':sugar'
 project(':sugar').projectDir = new File("C:\\androidstudio2015\\sugar\\library");
+
+include ':android-HoloCircularProgressBar'
+project(':android-HoloCircularProgressBar').projectDir = new File("C:\\androidstudio2015\\android-HoloCircularProgressBar\\library");

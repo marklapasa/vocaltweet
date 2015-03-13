@@ -1,4 +1,4 @@
-package net.lapasa.vocaltweet.fragments;
+package net.lapasa.vocaltweet.fragments.list;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -16,6 +16,9 @@ import com.twitter.sdk.android.tweetui.CompactTweetView;
 import com.twitter.sdk.android.tweetui.TweetViewAdapter;
 
 import net.lapasa.vocaltweet.R;
+import net.lapasa.vocaltweet.fragments.BaseFragment;
+import net.lapasa.vocaltweet.fragments.TweetDetailsFragment;
+import net.lapasa.vocaltweet.fragments.TweetUtteranceProgressListener;
 import net.lapasa.vocaltweet.models.TweetsModel;
 
 import java.util.Observable;
@@ -162,7 +165,7 @@ public class TweetsListFragment extends BaseFragment implements AbsListView.OnIt
                 {
                     listView.smoothScrollToPositionFromTop(model.getSelectedIndex(), 0);
                     CompactTweetView vg = (CompactTweetView) listView.getChildAt(model.getSelectedIndex());
-                    vg.setBackgroundColor(0xff0000);
+//                    vg.setBackgroundColor(0xff0000);
                     //                    listView.setSelection(model.getSelectedIndex());
                 }
             });

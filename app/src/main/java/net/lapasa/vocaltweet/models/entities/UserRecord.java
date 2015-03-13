@@ -132,18 +132,30 @@ public class UserRecord extends SugarRecord
         this.withheldScope = user.withheldScope;
 
 
+        initCache();
+    }
+
+    private static void initCache()
+    {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
         {
-            runtimeCacheMap = new HashMap<Long, UserRecord>();
+            if (runtimeCacheMap == null)
+            {
+                runtimeCacheMap = new HashMap<Long, UserRecord>();
+            }
         }
         else
         {
-            runtimeCacheSparseArray = new LongSparseArray<UserRecord>();
+            if (runtimeCacheSparseArray == null)
+            {
+                runtimeCacheSparseArray = new LongSparseArray<UserRecord>();
+            }
         }
     }
 
     public static UserRecord getCachedUserRecord(long userId)
     {
+        initCache();
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
         {
             return runtimeCacheMap.get(new Long(userId));

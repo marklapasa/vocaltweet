@@ -3,7 +3,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 tools:context="net.lapasa.vocaltweet.fragments.LoginFragment"
-                android:background="@color/tw__light_gray">
+                android:background="@color/tw__light_gray"
+                android:animateLayoutChanges="true">
 
     <com.twitter.sdk.android.core.identity.TwitterLoginButton
         android:id="@+id/login_button"

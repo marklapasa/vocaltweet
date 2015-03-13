@@ -1,4 +1,4 @@
-package net.lapasa.vocaltweet.fragments;
+package net.lapasa.vocaltweet.fragments.list;
 
 import android.content.Context;
 import android.view.View;

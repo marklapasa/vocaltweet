@@ -21,7 +21,7 @@ import java.util.HashMap;
 public class PlayTweetCommand
 {
     private static final String TAG = PlayTweetCommand.class.getName();
-    public static final String SILENCE = "_SILENCE";
+    public static final String SILENCE_ID = "_SILENCE_ID";
     private boolean isStopTTS;
     private Tweet tweet = null;
     private TweetUtteranceProgressListener listener = null;
@@ -30,7 +30,7 @@ public class PlayTweetCommand
     private Context context;
 
     /**
-     * Use this for API > 18
+     * When both tweet and listener = null, it will stop the playing speech and flush the queue
      *
      * @param context
      * @param tweet
@@ -88,15 +88,11 @@ public class PlayTweetCommand
         }
         else
         {
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP)
-            {
-                tts.playSilence(1,TextToSpeech.QUEUE_FLUSH, getTTSParamsMap(SILENCE));
-                Log.i(TAG, SILENCE);
-            } else
-            {
-                tts.playSilentUtterance(1,TextToSpeech.QUEUE_FLUSH, SILENCE);
-            }
+            // Force refresh of playback controls
+            listener.onDone(null);
         }
+
+
     }
 
     public static HashMap<String, String> getTTSParamsMap(String idStr)

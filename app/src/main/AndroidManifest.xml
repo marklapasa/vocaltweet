@@ -1,56 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="net.lapasa.vocaltweet"
-          xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="net.lapasa.vocaltweet" >
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.SET_DEBUG_APP"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.SET_DEBUG_APP" />
 
     <application
-        tools:replace="android:icon"
+        android:name="com.orm.SugarApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
-        android:name="com.orm.SugarApp">
+        tools:replace="android:icon" >
         <meta-data
             android:name="com.crashlytics.ApiKey"
-            android:value="6feb41380ee24cb9a0c87c409132ebfc2ec8d607"/>
-
+            android:value="6feb41380ee24cb9a0c87c409132ebfc2ec8d607" />
         <meta-data
             android:name="DATABASE"
-            android:value="vocal_tweet.db"/>
-
+            android:value="vocal_tweet.db" />
         <meta-data
             android:name="VERSION"
-            android:value="16"/>
-
+            android:value="17" />
         <meta-data
             android:name="DOMAIN_PACKAGE_NAME"
-            android:value="net.lapasa.vocaltweet.models.entities"/>
-
+            android:value="net.lapasa.vocaltweet.models.entities" />
         <meta-data
             android:name="QUERY_LOG"
-            android:value="true"/>
+            android:value="true" />
 
         <activity
-            android:name="net.lapasa.vocaltweet.fragments.TextToSpeechCheckActivity"
+            android:name=".fragments.TextToSpeechCheckActivity"
             android:label="@string/app_name"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
+
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
         </activity>
         <activity
-            android:name="net.lapasa.vocaltweet.MainActivity"
-            android:label="@string/app_name">
+            android:name=".AnimationActivity"
+            android:label="@string/title_activity_animation" >
+<!--            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>-->
         </activity>
         <activity
-            android:name="net.lapasa.vocaltweet.SettingsActivity"
+            android:name=".MainActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:theme="@android:style/Theme.Holo.Light">
+            android:theme="@android:style/Theme.Holo.Light" >
         </activity>
     </application>
 

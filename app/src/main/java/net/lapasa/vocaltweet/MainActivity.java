@@ -20,7 +20,7 @@ import com.twitter.sdk.android.core.TwitterSession;
 
 import net.lapasa.vocaltweet.fragments.LoginFragment;
 import net.lapasa.vocaltweet.fragments.NavigationDrawerFragment;
-import net.lapasa.vocaltweet.fragments.TweetsListFragment;
+import net.lapasa.vocaltweet.fragments.list.TweetsListFragment;
 import net.lapasa.vocaltweet.models.SearchTermsModel;
 import net.lapasa.vocaltweet.models.TweetsModel;
 

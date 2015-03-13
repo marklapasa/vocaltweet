@@ -20,5 +20,6 @@
     <string name="action_clear_recent_searches">Clear Recent Searches</string>
     <string name="action_clear_cached_tweets">Clear Cached Tweets</string>
     <string name="action_sign_out">Sign Out</string>
+    <string name="title_activity_animation">AnimationActivity</string>
 
 </resources>

@@ -1,4 +1,4 @@
-package net.lapasa.vocaltweet.fragments;
+package net.lapasa.vocaltweet.fragments.playback;
 
 /**
  * Created by mlapasa on 2/12/2015.

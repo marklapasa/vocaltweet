@@ -6,6 +6,7 @@ import android.app.Fragment;
 
 import net.lapasa.vocaltweet.ITweetModelActivity;
 import net.lapasa.vocaltweet.R;
+import net.lapasa.vocaltweet.fragments.playback.PlaybackControlsFragment;
 import net.lapasa.vocaltweet.models.TweetsModel;
 
 import java.util.Observer;
