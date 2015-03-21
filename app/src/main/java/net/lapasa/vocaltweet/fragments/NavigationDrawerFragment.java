@@ -17,6 +17,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -51,7 +52,7 @@ public class NavigationDrawerFragment extends Fragment implements Observer
      * expands it. This shared preference tracks this.
      */
     private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
-    private static final String CLOSE_NAV_DRAWER = "CLOSE_NAV_DRAWER" ;
+    private static final String CLOSE_NAV_DRAWER = "CLOSE_NAV_DRAWER";
 
 
     /**
@@ -63,7 +64,7 @@ public class NavigationDrawerFragment extends Fragment implements Observer
     private ListView recentSearchesListView;
     private View fragContainer;
 
-    private int mCurrentSelectedPosition = 0;
+    private int mCurrentSelectedPosition = -1;
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
     private RecentSearchesAdapter adapter;
@@ -90,10 +91,8 @@ public class NavigationDrawerFragment extends Fragment implements Observer
         {
             mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
             mFromSavedInstanceState = true;
+            selectItem(mCurrentSelectedPosition);
         }
-
-        // Select either the default item (0) or the last selected item.
-        selectItem(mCurrentSelectedPosition);
     }
 
     @Override
@@ -153,8 +152,7 @@ public class NavigationDrawerFragment extends Fragment implements Observer
                 if (s.length() == 0)
                 {
                     clearCancelBtn.setVisibility(View.GONE);
-                }
-                else
+                } else
                 {
                     clearCancelBtn.setVisibility(View.VISIBLE);
                 }
@@ -218,7 +216,7 @@ public class NavigationDrawerFragment extends Fragment implements Observer
 
         model.loadRecentSearchTerms();
 
-        TweetsModel.getInstance().loadTweets(record, getActivity());
+        TweetsModel.getInstance().loadTweets(record, getActivity(), false);
 
         navDrawer.closeDrawer(fragContainer);
 
@@ -237,9 +235,7 @@ public class NavigationDrawerFragment extends Fragment implements Observer
         });
 
         adapter = new RecentSearchesAdapter(getActivity().getLayoutInflater());
-
         recentSearchesListView.setAdapter(adapter);
-        recentSearchesListView.setItemChecked(mCurrentSelectedPosition, true);
 
 //        recentSearchesListView.addHeaderView(inflater.inflate(R.layout.recent_searches_header, null));
 
@@ -333,6 +329,11 @@ public class NavigationDrawerFragment extends Fragment implements Observer
         navDrawer.setDrawerListener(mDrawerToggle);
     }
 
+    /**
+     * Invoked when the user select a list item in the recent searches
+     *
+     * @param position
+     */
     private void selectItem(int position)
     {
         mCurrentSelectedPosition = position;
@@ -411,8 +412,7 @@ public class NavigationDrawerFragment extends Fragment implements Observer
         if (data == SearchTermsModel.SEARCH_TERMS_LOADED)
         {
             adapter.notifyDataSetInvalidated();
-        }
-        else if (data == CLOSE_NAV_DRAWER)
+        } else if (data == CLOSE_NAV_DRAWER)
         {
             navDrawer.closeDrawers();
         }
@@ -431,4 +431,15 @@ public class NavigationDrawerFragment extends Fragment implements Observer
         navDrawer.closeDrawers();
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        if (mDrawerToggle.onOptionsItemSelected(item))
+        {
+            return true;
+        }
+
+
+        return super.onOptionsItemSelected(item);
+    }
 }

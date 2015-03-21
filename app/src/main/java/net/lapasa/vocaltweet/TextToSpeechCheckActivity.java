@@ -1,13 +1,10 @@
-package net.lapasa.vocaltweet.fragments;
+package net.lapasa.vocaltweet;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
-
-import net.lapasa.vocaltweet.MainActivity;
-import net.lapasa.vocaltweet.R;
 
 public class TextToSpeechCheckActivity extends Activity
 {
@@ -23,7 +20,6 @@ public class TextToSpeechCheckActivity extends Activity
 
         sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
         String ttsInstalled = sharedPreferences.getString(TTS_ALREADY_INSTALLED, "n");
-        boolean isTTSInstalled = sharedPreferences.getBoolean(TTS_ALREADY_INSTALLED, false);
 
         if (ttsInstalled.equals("n"))
         {
@@ -47,9 +43,10 @@ public class TextToSpeechCheckActivity extends Activity
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS)
             {
                 // Remember that TTS is already installed
-                sharedPreferences.edit().putString(TTS_ALREADY_INSTALLED, "y");
-                sharedPreferences.edit().apply();
-                sharedPreferences.edit().commit();
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString(TTS_ALREADY_INSTALLED, "y");
+                editor.commit();
+
 
                 // Proceed to main application since TTS is already installed
                 launchMainApp();

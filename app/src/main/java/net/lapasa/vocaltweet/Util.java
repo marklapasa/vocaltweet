@@ -9,9 +9,13 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.widget.TextView;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Util
 {
     public static final String SABER_FONT = "fonts/Saber.ttf";
+    public static Map<String, Bitmap> bmpCache = new HashMap<String, Bitmap>();
 
 
     public static void setTypeFaceOnTextView(TextView textView, String fontPath)
@@ -44,4 +48,5 @@ public class Util
 
         return ret;
     }
+
 }

@@ -100,7 +100,7 @@ public class MainActivity extends Activity implements ITweetModelActivity, TextT
     {
         FragmentManager fm = getFragmentManager();
         FragmentTransaction txn = fm.beginTransaction();
-        txn.replace(R.id.container, frag, frag.getClass().getName());
+        txn.replace(R.id.mainView, frag, frag.getClass().getName());
         txn.commit();
     }
 
@@ -154,6 +154,7 @@ public class MainActivity extends Activity implements ITweetModelActivity, TextT
             Twitter.getSessionManager().clearActiveSession();
             navDrawerFrag.closeDrawer();
             loadFragment(new LoginFragment());
+            return true;
         }
 
         return super.onOptionsItemSelected(item);

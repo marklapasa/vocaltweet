@@ -4,39 +4,54 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:context=".MainActivity"
-                android:padding="20dp">
+                android:background="#88000000">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/black"
+        android:paddingBottom="20dp"/>
 
 
     <!-- Play/Pause button -->
-    <include
-        layout="@layout/playpause"
+    <RelativeLayout
+        android:id="@+id/playPauseLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/playPauseTweetBtn"
-        android:layout_centerInParent="true"/>
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:layout_centerHorizontal="true">
 
-    <net.lapasa.vocaltweet.fragments.playback.CustomHoloCircularProgressBar
-        android:id="@+id/holoCircularProgressBarSilence"
-        android:layout_width="125dp"
-        android:layout_height="125dp"
-        app:progress="0.0"
-        app:progress_color="#AAA"
-        app:progress_background_color="#666"
-        app:thumb_visible="false"
-        app:marker_visible="false"
-        android:layout_centerInParent="true"/>
+        <include
+            layout="@layout/playpause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/playPauseTweetBtn"
+            android:layout_centerInParent="true"/>
 
-    <net.lapasa.vocaltweet.fragments.playback.CustomHoloCircularProgressBar
-        android:id="@+id/holoCircularProgressBar"
-        android:layout_width="125dp"
-        android:layout_height="125dp"
-        app:progress="0.0"
-        app:progress_color="#fff"
-        app:progress_background_color="#00000000"
-        app:thumb_visible="false"
-        app:marker_visible="false"
-        android:layout_centerInParent="true"/>
+        <net.lapasa.vocaltweet.fragments.playback.CustomHoloCircularProgressBar
+            android:id="@+id/holoCircularProgressBarSilence"
+            android:layout_width="125dp"
+            android:layout_height="125dp"
+            app:progress="0.0"
+            app:progress_color="#AAA"
+            app:progress_background_color="#33ffffff"
+            app:thumb_visible="false"
+            app:marker_visible="false"
+            android:layout_centerInParent="true"/>
 
+        <net.lapasa.vocaltweet.fragments.playback.CustomHoloCircularProgressBar
+            android:id="@+id/holoCircularProgressBar"
+            android:layout_width="125dp"
+            android:layout_height="125dp"
+            app:progress="0.0"
+            app:progress_color="#fff"
+            app:progress_background_color="#00000000"
+            app:thumb_visible="false"
+            app:marker_visible="false"
+            android:layout_centerInParent="true"/>
+
+    </RelativeLayout>
 
 
     <!-- Rewind -->
@@ -44,9 +59,9 @@
         android:id="@+id/prevTweetBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@id/holoCircularProgressBar"
+        android:layout_toLeftOf="@id/playPauseLayout"
         android:layout_centerVertical="true"
-        android:src="@drawable/ic_prev"
+        android:src="@drawable/previous_tweet"
         android:background="#00FFFFFF"/>
 
 
@@ -55,9 +70,9 @@
         android:id="@+id/nextTweetBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/holoCircularProgressBar"
+        android:layout_toRightOf="@id/playPauseLayout"
         android:layout_centerVertical="true"
-        android:src="@drawable/ic_next"
+        android:src="@drawable/next_tweet"
         android:background="#00FFFFFF"/>
 
 

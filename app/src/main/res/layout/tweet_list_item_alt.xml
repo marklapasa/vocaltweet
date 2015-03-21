@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/msgWindow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/glassright"
+        android:padding="10dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginBottom="5dp"
+        android:orientation="vertical"
+        android:layout_weight="9">
+
+        <ImageView
+            android:id="@+id/tweetMsgImg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scaleType="fitCenter"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/msgText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="&quot;Lorem ipsum dolor sit amet, est ipsum albucius laboramus eu, vix consul eligendi ne, offendit mediocritatem vel ea. Qui et tibique placerat&quot;"
+            android:textColor="@color/white"
+            android:textSize="20sp"/>
+
+        <TextView
+            android:id="@+id/footerText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Darth Vader &#8226; 59 min ago"
+            android:textColor="@color/white"
+            android:layout_gravity="right"
+            android:textSize="8sp"/>
+
+    </LinearLayout>
+
+    <!-- User profile pic -->
+    <com.pkmmte.view.CircularImageView
+        android:id="@+id/userProfilePic"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layerType="none"
+        android:layout_marginTop="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginLeft="5dp"
+        app:shadow="true"
+        android:layout_weight="1"/>
+
+</LinearLayout>

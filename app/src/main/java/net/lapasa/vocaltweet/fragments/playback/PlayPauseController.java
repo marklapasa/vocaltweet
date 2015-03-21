@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 
 import net.lapasa.vocaltweet.R;
@@ -36,7 +38,7 @@ public class PlayPauseController implements View.OnClickListener
         this.view.setOnClickListener(this);
         playIcon = view.findViewById(R.id.playIcon);
         pauseIcon = view.findViewById(R.id.pauseIcon);
-
+        pauseIcon.setVisibility(View.GONE);
 
         // Default position is paused
         stop();
@@ -55,16 +57,11 @@ public class PlayPauseController implements View.OnClickListener
 
     public void play()
     {
-        this.pauseIcon.setVisibility(View.VISIBLE);
-        this.playIcon.setVisibility(View.GONE);
         _isPlaying = true;
     }
 
     public void stop()
     {
-        this.pauseIcon.setVisibility(View.GONE);
-        this.playIcon.setVisibility(View.VISIBLE);
-
         _isPlaying = false;
     }
 
@@ -81,15 +78,21 @@ public class PlayPauseController implements View.OnClickListener
 
         TweetUtteranceProgressListener listener = new TweetUtteranceProgressListener(context, model, silenceGap);
 
-        if (view.equals(nextBtn))
+        if (view.equals(prevBtn))
         {
+            model.isPlaying = false;
             new PlayTweetCommand(context, null, null).execute();
-            new PlayTweetCommand(context, model.getNextTweet(), listener).execute();
-        }
-        else if (view.equals(prevBtn))
-        {
-            new PlayTweetCommand(context, null, null).execute();
+            model.notifyObservers(TweetUtteranceProgressListener.UTTERANCE_INTERRUPTED);
+            model.isPlaying = true;
             new PlayTweetCommand(context, model.getPrevTweet(), listener).execute();
+        }
+        else if (view.equals(nextBtn))
+        {
+            model.isPlaying = false;
+            new PlayTweetCommand(context, null, null).execute();
+            model.notifyObservers(TweetUtteranceProgressListener.UTTERANCE_INTERRUPTED);
+            model.isPlaying = true;
+            new PlayTweetCommand(context, model.getNextTweet(), listener).execute();
         }
         else if (view.equals(getView()))
         {
@@ -99,6 +102,7 @@ public class PlayPauseController implements View.OnClickListener
                 stop();
                 model.isPlaying = false;
                 new PlayTweetCommand(context, null, null).execute();
+                runPlayIconOutroPauseIconIntro();
             }
             else
             {
@@ -111,7 +115,125 @@ public class PlayPauseController implements View.OnClickListener
                 }
 
                 new PlayTweetCommand(context, model.getSelectedTweet(), listener).execute();
+                runPlayIconIntroPauseIconOutro();
             }
         }
+    }
+
+    private void runPlayIconIntroPauseIconOutro()
+    {
+        // Push Play button into the background
+        Animation animationPlayBtn = AnimationUtils.loadAnimation(context, R.anim.playpause_intro);
+        animationPlayBtn.setAnimationListener(new Animation.AnimationListener()
+        {
+            @Override
+            public void onAnimationStart(Animation animation)
+            {
+                playIcon.setVisibility(View.VISIBLE);
+                pauseIcon.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation)
+            {
+                playIcon.setVisibility(View.GONE);
+                pauseIcon.setVisibility(View.VISIBLE);
+            }
+            @Override
+            public void onAnimationRepeat(Animation animation)
+            {
+
+            }
+        });
+
+
+        // Bring Pause into the foreground
+        Animation animationPauseBtn = AnimationUtils.loadAnimation(context, R.anim.playpause_outro);
+        animationPauseBtn.setStartTime(1501);
+        animationPauseBtn.setAnimationListener(new Animation.AnimationListener()
+        {
+            @Override
+            public void onAnimationStart(Animation animation)
+            {
+                playIcon.setVisibility(View.GONE);
+                pauseIcon.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation)
+            {
+                playIcon.setVisibility(View.GONE);
+                pauseIcon.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation)
+            {
+
+            }
+        });
+
+
+        playIcon.startAnimation(animationPlayBtn);
+        pauseIcon.startAnimation(animationPauseBtn);
+
+    }
+
+    private void runPlayIconOutroPauseIconIntro()
+    {
+        // Push Play button into the background
+        Animation animationPlayBtn = AnimationUtils.loadAnimation(context, R.anim.playpause_outro);
+        animationPlayBtn.setAnimationListener(new Animation.AnimationListener()
+        {
+            @Override
+            public void onAnimationStart(Animation animation)
+            {
+                playIcon.setVisibility(View.VISIBLE);
+                pauseIcon.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation)
+            {
+                playIcon.setVisibility(View.GONE);
+                pauseIcon.setVisibility(View.VISIBLE);
+            }
+            @Override
+            public void onAnimationRepeat(Animation animation)
+            {
+
+            }
+        });
+
+
+        // Bring Pause into the foreground
+        Animation animationPauseBtn = AnimationUtils.loadAnimation(context, R.anim.playpause_intro);
+        animationPauseBtn.setStartTime(1501);
+        animationPauseBtn.setAnimationListener(new Animation.AnimationListener()
+        {
+            @Override
+            public void onAnimationStart(Animation animation)
+            {
+                playIcon.setVisibility(View.GONE);
+                pauseIcon.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation)
+            {
+                playIcon.setVisibility(View.GONE);
+                pauseIcon.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation)
+            {
+
+            }
+        });
+
+
+        playIcon.startAnimation(animationPlayBtn);
+        pauseIcon.startAnimation(animationPauseBtn);
     }
 }

@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,8 @@ import net.lapasa.vocaltweet.fragments.BaseFragment;
 import net.lapasa.vocaltweet.fragments.TweetUtteranceProgressListener;
 import net.lapasa.vocaltweet.models.TweetsModel;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Observable;
 
 
@@ -25,6 +28,7 @@ import java.util.Observable;
 public class PlaybackControlsFragment extends BaseFragment implements IProgressBarClient
 {
     private static final int DEFAULT_PROGRESS_DURATION = 1000;
+    private static final String TAG = PlaybackControlsFragment.class.getName();
     private ImageButton nextBtn;
     private ImageButton prevBtn;
     private PlayPauseController playPauseController;
@@ -32,7 +36,7 @@ public class PlaybackControlsFragment extends BaseFragment implements IProgressB
     private HoloCircularProgressBar silenceCircularProgressBar;
     private ObjectAnimator objAnimatorProgress;
     private ObjectAnimator objAnimatorSilenece;
-
+    private Map<Object, Object> animatorMaps = new HashMap<Object, Object>();
 
     /**
      * Constructor
@@ -70,6 +74,10 @@ public class PlaybackControlsFragment extends BaseFragment implements IProgressB
         {
             updateSilenceProgressBar();
         }
+        else if (data == TweetUtteranceProgressListener.UTTERANCE_INTERRUPTED)
+        {
+            resetSilenceCircularProgressBar(0);
+        }
     }
 
     public void updateProgressBar()
@@ -79,7 +87,7 @@ public class PlaybackControlsFragment extends BaseFragment implements IProgressB
             @Override
             public void run()
             {
-                animateCircularProgressBar(0, silenceCircularProgressBar, 1000);
+                resetSilenceCircularProgressBar(1000);
 
                 nextBtn.setEnabled(model.hasNextTweet());
                 prevBtn.setEnabled(model.hasPrevTweet());
@@ -105,6 +113,12 @@ public class PlaybackControlsFragment extends BaseFragment implements IProgressB
         });
     }
 
+    private void resetSilenceCircularProgressBar(int time)
+    {
+        Log.d(TAG, "Show silence as empty");
+        animateCircularProgressBar(0, silenceCircularProgressBar, time);
+    }
+
     @Override
     public void updateSilenceProgressBar()
     {
@@ -114,6 +128,7 @@ public class PlaybackControlsFragment extends BaseFragment implements IProgressB
             public void run()
             {
                 animateCircularProgressBar(1, silenceCircularProgressBar, playPauseController.silenceGap);
+                Log.d(TAG, "Show silence in full");
             }
         });
     }
@@ -128,6 +143,9 @@ public class PlaybackControlsFragment extends BaseFragment implements IProgressB
 
         this.nextBtn = (ImageButton) getView().findViewById(R.id.nextTweetBtn);
         this.prevBtn = (ImageButton) getView().findViewById(R.id.prevTweetBtn);
+        this.nextBtn.setEnabled(false);
+        this.prevBtn.setEnabled(false);
+
         playPauseController = new PlayPauseController(getActivity(), getView().findViewById(R.id.playPauseTweetBtn), model, nextBtn, prevBtn, this);
         this.circularProgressBar = (HoloCircularProgressBar) getView().findViewById(R.id.holoCircularProgressBar);
         this.silenceCircularProgressBar = (HoloCircularProgressBar) getView().findViewById(R.id.holoCircularProgressBarSilence);
@@ -139,14 +157,15 @@ public class PlaybackControlsFragment extends BaseFragment implements IProgressB
 
     private void animateCircularProgressBar(final float progress, final HoloCircularProgressBar targetProgressBar, final int duration)
     {
-        ObjectAnimator circularProgressBarAnimator = ObjectAnimator.ofFloat(targetProgressBar, "progress", progress);
-        circularProgressBarAnimator.setDuration(duration);
+        ObjectAnimator circularProgressBarAnimator = (ObjectAnimator) animatorMaps.get(targetProgressBar);
 
-        if (targetProgressBar == circularProgressBar)
+        if (circularProgressBarAnimator == null)
         {
-            circularProgressBarAnimator.setStartDelay(250);
+            circularProgressBarAnimator = ObjectAnimator.ofFloat(targetProgressBar, "progress", progress);
+            animatorMaps.put(targetProgressBar, circularProgressBarAnimator);
         }
-
+        circularProgressBarAnimator.setDuration(duration);
+        circularProgressBarAnimator.removeAllListeners();
         circularProgressBarAnimator.addListener(new Animator.AnimatorListener()
         {
 
@@ -180,6 +199,7 @@ public class PlaybackControlsFragment extends BaseFragment implements IProgressB
                 targetProgressBar.setProgress((Float) animation.getAnimatedValue());
             }
         });
+
         circularProgressBarAnimator.start();
     }
 }

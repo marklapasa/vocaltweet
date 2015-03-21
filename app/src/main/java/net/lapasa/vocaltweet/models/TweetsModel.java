@@ -4,7 +4,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.twitter.sdk.android.core.Callback;
+import com.twitter.sdk.android.core.Result;
+import com.twitter.sdk.android.core.TwitterApiClient;
+import com.twitter.sdk.android.core.TwitterCore;
+import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.models.Tweet;
 import com.twitter.sdk.android.core.services.StatusesService;
 
@@ -14,8 +20,11 @@ import net.lapasa.vocaltweet.models.entities.TweetRecord;
 import net.lapasa.vocaltweet.models.entities.UserRecord;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Observable;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class TweetsModel extends Observable
 {
@@ -26,12 +35,15 @@ public class TweetsModel extends Observable
     private static final String TAG = TweetsModel.class.getName();
     StatusesService statusesService;
 
-    final private List<Tweet> tweets = new ArrayList<Tweet>();
+//    final private List<Tweet> tweets = new ArrayList<Tweet>();
+    final private Set<Tweet> tweets = new TreeSet<Tweet>(new TweetComparator());
+
     private int selectedIndex = -1;
     public boolean isPlaying;
     private static TweetsModel _instance;
     private SharedPreferences sharedPreferences;
     private SearchTermRecord activeSearchTerm = null;
+    private List<Tweet> tweetArray = new ArrayList<Tweet>();
 
     private TweetsModel()
     {
@@ -48,37 +60,88 @@ public class TweetsModel extends Observable
     }
 
 
-    public void setTweets(List<Tweet> tweets)
+    /**
+     * Take Tweet objects and place them into the main collection. Send out a notification when
+     * this action is done
+     *
+     * @param tweets
+     * @param isAppending
+     */
+    public void setTweets(List<Tweet> tweets, boolean isAppending)
     {
-        this.tweets.clear();
-
-        for (Tweet t : tweets)
+        if (isAppending)
         {
-            this.tweets.add(t);
+            // De-duplicate
+            tweets = deduplicate(tweets);
+            this.tweets.addAll(tweets);
+
+            // Persist the tweets for offline
+            persistTweets(tweets);
+        }
+        else
+        {
+            this.tweets.clear();
+            for (Tweet t : tweets)
+            {
+                this.tweets.add(t);
+            }
         }
 
-        if (tweets.size() > 0)
+        // Rebuild index
+        tweetArray.clear();
+        tweetArray.addAll(this.tweets);
+
+        if (this.tweets.size() > 0)
         {
             notifyObservers(NEW_TWEETS_RECEIVED);
+            selectedIndex = 0;
+
         }
-        else if (tweets.size() == 0)
+        else if (this.tweets.size() == 0)
         {
             notifyObservers(NO_TWEETS_AVAILABLE);
+            selectedIndex = -1;
         }
 
-        selectedIndex = 0;
+
+
+
+    }
+
+    private List<Tweet> deduplicate(List<Tweet> tweets)
+    {
+        ArrayList<Tweet> discardPile = new ArrayList<Tweet>();
+        for (Tweet tweetOld : this.tweets)
+        {
+            for (Tweet tweetNew : tweets)
+            {
+                if (tweetOld.id == tweetNew.id)
+                {
+                    discardPile.add(tweetNew);
+                }
+            }
+        }
+
+        if (!discardPile.isEmpty())
+        {
+            HashSet<Tweet> hashSet = new HashSet<Tweet>(tweets);
+            hashSet.removeAll(discardPile);
+            tweets = new ArrayList<Tweet>(hashSet);
+        }
+
+        return tweets;
     }
 
     public List<Tweet> getTweets()
     {
-        return tweets;
+        return tweetArray;
     }
 
     public Tweet getNextTweet()
     {
         if (!tweets.isEmpty() && hasNextTweet())
         {
-            return tweets.get(++selectedIndex);
+            return tweetArray.get(++selectedIndex);
         }
         return null;
     }
@@ -87,7 +150,7 @@ public class TweetsModel extends Observable
     {
         if (!tweets.isEmpty() && hasPrevTweet())
         {
-            return tweets.get(--selectedIndex);
+            return tweetArray.get(--selectedIndex);
         }
         return null;
     }
@@ -110,7 +173,7 @@ public class TweetsModel extends Observable
      * @param record
      * @param context
      */
-    public void loadTweets(SearchTermRecord record, Context context)
+    public void loadTweets(SearchTermRecord record, Context context, boolean isRefreshing)
     {
         activeSearchTerm = record;
 
@@ -126,38 +189,15 @@ public class TweetsModel extends Observable
         }
         else
         {
-            goOfflineMode();
-/*
-            try
+            Log.i(TAG, "Loading local tweets first");
+            if (!isRefreshing)
             {
-                TwitterApiClient apiClient = TwitterCore.getInstance().getApiClient();
-
-                statusesService = apiClient.getStatusesService();
-
-                statusesService.homeTimeline(COUNT + 1, null, null, null, null, null, null, new Callback<List<Tweet>>()
-                {
-                    @Override
-                    public void success(Result<List<Tweet>> listResult)
-                    {
-                        List<Tweet> tweets = listResult.data;
-                        setTweets(tweets);
-
-                        // Persist the tweets for offline
-                        persistTweets(tweets);
-                    }
-
-                    @Override
-                    public void failure(TwitterException e)
-                    {
-                        goOfflineMode();
-                    }
-                });
-
-            } catch (IllegalStateException e) // java.lang.IllegalStateException: Must have valid session. Did you authenticate with Twitter?
-            {
-                goOfflineMode();
+                List<Tweet> tweets = loadTweetsFromDB();
+                setTweets(tweets, false);
             }
-*/
+
+            Log.i(TAG, "Loading remote tweets second");
+            loadTweetsFromRemote(context);
         }
 
 
@@ -175,13 +215,40 @@ public class TweetsModel extends Observable
         COUNT = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.pref_define_max_tweet), "25"));
     }
 
-    private void goOfflineMode()
-    {
-        Log.e(TAG, "Could not load tweets from remote server, will load locally persisted tweets");
 
-        List<Tweet> tweets = loadTweetsFromDB();
-        setTweets(tweets);
+    private void loadTweetsFromRemote(final Context context)
+    {
+        try
+        {
+            TwitterApiClient apiClient = TwitterCore.getInstance().getApiClient();
+
+            statusesService = apiClient.getStatusesService();
+
+            statusesService.homeTimeline(COUNT + 1, null, null, null, null, null, null, new Callback<List<Tweet>>()
+            {
+                @Override
+                public void success(Result<List<Tweet>> listResult)
+                {
+                    List<Tweet> tweets = listResult.data;
+                    setTweets(tweets, true);
+                }
+
+                @Override
+                public void failure(TwitterException e)
+                {
+//                    Toast.makeText(context, "Check connection to the internet", Toast.LENGTH_LONG).show();
+                    notifyObservers(NEW_TWEETS_RECEIVED);
+
+                }
+            });
+
+        } catch (IllegalStateException e) // java.lang.IllegalStateException: Must have valid session. Did you authenticate with Twitter?
+        {
+            // do nothing
+        }
     }
+
+
 
     private List<Tweet> loadTweetsFromDB()
     {
@@ -205,11 +272,13 @@ public class TweetsModel extends Observable
             if (!results.isEmpty())
             {
                 // If the tweet already exists, don't attenpt to persist it again
+                Log.i(TAG, remoteIdStr + " already exists, will not persist");
                 continue;
             }
 
             TweetRecord tweetRecord = new TweetRecord(tweet);
             tweetRecord.save();
+            Log.i(TAG, tweetRecord.getId() + " tweet record saved!");
         }
     }
 
@@ -222,7 +291,7 @@ public class TweetsModel extends Observable
     {
         if (selectedIndex >= 0)
         {
-            return tweets.get(selectedIndex);
+            return tweetArray.get(selectedIndex);
         }
         else
         {
@@ -241,7 +310,7 @@ public class TweetsModel extends Observable
     {
         TweetRecord.deleteAll(TweetRecord.class);
         UserRecord.deleteAll(UserRecord.class);
-        loadTweets(null, context);
+        loadTweets(null, context, true);
     }
 
     public SearchTermRecord getActiveSearchTerm()

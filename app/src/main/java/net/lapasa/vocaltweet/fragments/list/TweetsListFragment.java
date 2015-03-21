@@ -12,9 +12,6 @@ import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
-import com.twitter.sdk.android.tweetui.CompactTweetView;
-import com.twitter.sdk.android.tweetui.TweetViewAdapter;
-
 import net.lapasa.vocaltweet.R;
 import net.lapasa.vocaltweet.fragments.BaseFragment;
 import net.lapasa.vocaltweet.fragments.TweetDetailsFragment;
@@ -45,8 +42,17 @@ public class TweetsListFragment extends BaseFragment implements AbsListView.OnIt
      * Views.
      */
     //    private TweetViewFetchAdapter adapter;
-    private TweetViewAdapter adapter;
+//    private TweetViewAdapter adapter;
+    private CustomTweetViewAdapter adapter;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private SwipeRefreshLayout.OnRefreshListener swipeRefreshListener = new SwipeRefreshLayout.OnRefreshListener()
+    {
+        @Override
+        public void onRefresh()
+        {
+            model.loadTweets(model.getActiveSearchTerm(), getActivity(), true);
+        }
+    };
 
 
     /**
@@ -63,7 +69,8 @@ public class TweetsListFragment extends BaseFragment implements AbsListView.OnIt
     {
         super.onActivityCreated(savedInstanceState);
         //        adapter = new TweetViewFetchAdapter<CompactTweetView>(getActivity());
-        adapter = new CustomTweetViewAdapter<CompactTweetView>(getActivity());
+//        adapter = new CustomTweetViewAdapter<CompactTweetView>(getActivity());
+        adapter = new CustomTweetViewAdapter(getActivity());
         ((AdapterView<ListAdapter>) listView).setAdapter(adapter);
 
         // Define the container that will store the data
@@ -71,7 +78,16 @@ public class TweetsListFragment extends BaseFragment implements AbsListView.OnIt
         adapter.setTweets(model.getTweets());
 
         setEmptyText("Please Wait...");
-        model.loadTweets(null, getActivity());
+
+        swipeRefreshLayout.post(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                swipeRefreshLayout.setRefreshing(true);
+                swipeRefreshListener.onRefresh();
+            }
+        });
     }
 
 
@@ -102,14 +118,7 @@ public class TweetsListFragment extends BaseFragment implements AbsListView.OnIt
 
 
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefreshLayout);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
-        {
-            @Override
-            public void onRefresh()
-            {
-                model.loadTweets(model.getActiveSearchTerm(), getActivity());
-            }
-        });
+        swipeRefreshLayout.setOnRefreshListener(swipeRefreshListener);
         return view;
     }
 
@@ -164,7 +173,7 @@ public class TweetsListFragment extends BaseFragment implements AbsListView.OnIt
                 public void run()
                 {
                     listView.smoothScrollToPositionFromTop(model.getSelectedIndex(), 0);
-                    CompactTweetView vg = (CompactTweetView) listView.getChildAt(model.getSelectedIndex());
+//                    CompactTweetView vg = (CompactTweetView) listView.getChildAt(model.getSelectedIndex());
 //                    vg.setBackgroundColor(0xff0000);
                     //                    listView.setSelection(model.getSelectedIndex());
                 }

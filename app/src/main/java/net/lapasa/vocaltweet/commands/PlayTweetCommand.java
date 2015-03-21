@@ -41,12 +41,17 @@ public class PlayTweetCommand
         this.context = context;
         this.tts = ((ITweetModelActivity) context).getTextToSpeech();
 
+
+
         if (tweet == null && listener == null)
         {
             isStopTTS = true;
+            Log.i(TAG, "PlayTweetCommand: STOP");
+
         }
         else
         {
+            Log.i(TAG, "PlayTweetCommand:" +tweet.user.name);
             this.tweet = tweet;
             this.listener = listener;
         }
@@ -116,10 +121,17 @@ public class PlayTweetCommand
 
     private void composeAudibleText()
     {
-        audibleText = tweet.user.name + " says ... " + tweet.text;
+        audibleText = tweet.user.name + " says  " + tweet.text;
         audibleText = audibleText.replaceAll("RT\\s?", "Rhee Tweeets");
-        audibleText = audibleText.replaceAll("((http[s]?|ftp):\\/)?\\/?([^:\\/\\s]+)((\\/\\w+)*\\/)([\\w\\-\\.]+[^#?\\s]+)(.*)?(#[\\w\\-]+)?", "");
-        audibleText = audibleText.replace("<3", "love");
+        audibleText = audibleText.replaceAll("(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?", "");
+        audibleText = audibleText.replaceAll("\\<3", "love");
+        audibleText = audibleText.replaceAll("didnt", "didn't");
+        audibleText = audibleText.replaceAll("thx", "thanks");
+        audibleText = audibleText.replaceAll("@", " at  ");
+        audibleText = audibleText.replaceAll("#", " hashtag  ");
         audibleText += "...";
+
+        // TODO:
+//        audibleText = audibleText.replaceAll("#1", "Number One");
     }
 }

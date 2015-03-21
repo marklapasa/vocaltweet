@@ -14,7 +14,7 @@ import net.lapasa.vocaltweet.models.TweetsModel;
  */
 public class TweetUtteranceProgressListener extends UtteranceProgressListener // implements TextToSpeech.OnUtteranceCompletedListener
 {
-    public static int SILENCE = -100;
+    public static int UTTERANCE_INTERRUPTED = 12;
     public static int UTTERANCE_STARTED = 10;
     public static int UTTERANCE_COMPLETE = 11;
 
@@ -47,26 +47,27 @@ public class TweetUtteranceProgressListener extends UtteranceProgressListener //
     {
         if (model.hasNextTweet() && model.isPlaying)
         {
-            model.notifyObservers(SILENCE);
+
+
             handler = new Handler(Looper.getMainLooper());
             handler.postDelayed(new Runnable()
             {
                 @Override
                 public void run()
                 {
+                    new PlayTweetCommand(context, null, null).execute();
                     new PlayTweetCommand(context, model.getNextTweet(), TweetUtteranceProgressListener.this).execute();
-
                 }
             },silenceGap);
-
-
+            model.notifyObservers(UTTERANCE_COMPLETE);
         }
         else if (!model.hasNextTweet())
         {
             model.isPlaying = false;
             handler.removeCallbacksAndMessages(null);
+            model.notifyObservers(UTTERANCE_COMPLETE);
         }
-        model.notifyObservers(UTTERANCE_COMPLETE);
+
     }
 
 
